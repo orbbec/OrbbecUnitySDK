@@ -13,7 +13,8 @@ public class ColorImageView : MonoBehaviour
     void Start()
     {
         colorTexture = new Texture2D(0, 0, TextureFormat.RGB24, false);
-        GetComponent<RawImage>().texture = colorTexture;
+        // GetComponent<RawImage>().texture = colorTexture;
+        GetComponent<Renderer>().material.mainTexture = colorTexture;
     }
 
     // Update is called once per frame
