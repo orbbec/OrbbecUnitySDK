@@ -3,6 +3,7 @@ using System.Collections.Generic;
 using UnityEngine;
 using Orbbec;
 using UnityEngine.Events;
+using System.Collections.Concurrent;
 
 [System.Serializable]
 public struct ImageMode
@@ -13,10 +14,12 @@ public struct ImageMode
     public Format format;
 }
 
-[System.Serializable]
-public class FrameEvent : UnityEvent<Frame>
+public struct ImageData
 {
-
+    public int width;
+    public int height;
+    public Format format;
+    public byte[] data;
 }
 
 public class OrbbecManager : MonoBehaviour
@@ -28,9 +31,9 @@ public class OrbbecManager : MonoBehaviour
     public bool enableColor;
     public bool enableDepth;
     public bool enableIR;
-    public FrameEvent onColorFrame;
-    public FrameEvent onDepthFrame;
-    public FrameEvent onIRFrame;
+    public ImageData colorData;
+    public ImageData depthData;
+    public ImageData irData;
 
     // private Pipeline pipeline;
     // private Config config;
@@ -197,22 +200,61 @@ public class OrbbecManager : MonoBehaviour
 
     private void ColorFrameCallback(Frame frame)
     {
-        Debug.Log(frame.GetFrameType());
-        onColorFrame.Invoke(frame);
+        if(frame == null)
+        {
+            return;
+        }
+        // Debug.Log(frame.GetFrameType());
+        ColorFrame colorFrame = frame as ColorFrame;
+        int dataSize = (int)colorFrame.GetDataSize();
+        if(colorData.data == null || colorData.data.Length != dataSize)
+        {
+            colorData.data = new byte[dataSize];
+        }
+        colorFrame.CopyData(ref colorData.data);
+        colorData.width = (int)colorFrame.GetWidth();
+        colorData.height = (int)colorFrame.GetHeight();
+        colorData.format = colorFrame.GetFormat();
         frame.Dispose();
     }
 
     private void DepthFrameCallback(Frame frame)
     {
-        Debug.Log(frame.GetFrameType());
-        onDepthFrame.Invoke(frame);
+        if(frame == null)
+        {
+            return;
+        }
+        // Debug.Log(frame.GetFrameType());
+        DepthFrame depthFrame = frame as DepthFrame;
+        int dataSize = (int)depthFrame.GetDataSize();
+        if(depthData.data == null || depthData.data.Length != dataSize)
+        {
+            depthData.data = new byte[dataSize];
+        }
+        depthFrame.CopyData(ref depthData.data);
+        depthData.width = (int)depthFrame.GetWidth();
+        depthData.height = (int)depthFrame.GetHeight();
+        depthData.format = depthFrame.GetFormat();
         frame.Dispose();
     }
 
     private void IRFrameCallback(Frame frame)
     {
-        Debug.Log(frame.GetFrameType());
-        onIRFrame.Invoke(frame);
+        if(frame == null)
+        {
+            return;
+        }
+        // Debug.Log(frame.GetFrameType());
+        IRFrame irFrame = frame as IRFrame;
+        int dataSize = (int)irFrame.GetDataSize();
+        if(irData.data == null || irData.data.Length != dataSize)
+        {
+            irData.data = new byte[dataSize];
+        }
+        irFrame.CopyData(ref irData.data);
+        irData.width = (int)irFrame.GetWidth();
+        irData.height = (int)irFrame.GetHeight();
+        irData.format = irFrame.GetFormat();
         frame.Dispose();
     }
 }

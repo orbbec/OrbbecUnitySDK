@@ -11,7 +11,6 @@ public class ColorFrameRender : MonoBehaviour
 
     void Start()
     {
-        orbbecManager.onColorFrame.AddListener(OnColorFrame);
         colorTexture = new Texture2D(0, 0, TextureFormat.RGB24, false);
     }
 
