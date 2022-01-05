@@ -30,6 +30,7 @@ public class OrbbecDeviceManager : MonoBehaviour
     public bool enableColor;
     public bool enableDepth;
     public bool enableIR;
+    public bool autoStart;
     public ImageData colorData;
     public ImageData depthData;
     public ImageData irData;
@@ -141,17 +142,17 @@ public class OrbbecDeviceManager : MonoBehaviour
                         irProfile.GetFPS(), 
                         irProfile.GetFormat()));
         }
-        if (enableColor)
+        if (enableColor && autoStart)
         {
             colorSensor.Start(colorProfile, ColorFrameCallback);
             Debug.Log("auto start color stream");
         }
-        if (enableDepth)
+        if (enableDepth && autoStart)
         {
             depthSensor.Start(depthProfile, DepthFrameCallback);
             Debug.Log("auto start depth stream");
         }
-        if (enableIR)
+        if (enableIR && autoStart)
         {
             irSensor.Start(irProfile, IRFrameCallback);
             Debug.Log("auto start ir stream");
@@ -250,5 +251,37 @@ public class OrbbecDeviceManager : MonoBehaviour
         irData.height = (int)irFrame.GetHeight();
         irData.format = irFrame.GetFormat();
         frame.Dispose();
+    }
+
+    public void StartStream(StreamType streamType)
+    {
+        switch (streamType)
+        {
+            case StreamType.OB_STREAM_COLOR:
+                colorSensor.Start(colorProfile, ColorFrameCallback);
+                break;
+            case StreamType.OB_STREAM_DEPTH:
+                depthSensor.Start(depthProfile, DepthFrameCallback);
+                break;
+            case StreamType.OB_STREAM_IR:
+                irSensor.Start(irProfile, IRFrameCallback);
+                break;
+        }
+    }
+    
+    public void StopStream(StreamType streamType)
+    {
+        switch (streamType)
+        {
+            case StreamType.OB_STREAM_COLOR:
+                colorSensor.Stop();
+                break;
+            case StreamType.OB_STREAM_DEPTH:
+                depthSensor.Stop();
+                break;
+            case StreamType.OB_STREAM_IR:
+                irSensor.Stop();
+                break;
+        }
     }
 }

@@ -138,7 +138,7 @@ public class OrbbecPipelineManager : MonoBehaviour
         }
         if(autoStart)
         {
-            pipeline.Start(config, FrameSetCallback);
+            pipeline.Start(config, FramesetCallback);
         }
         Debug.Log("SDK has intialized");
         hasInit = true;
@@ -172,7 +172,7 @@ public class OrbbecPipelineManager : MonoBehaviour
         hasInit = false;
     }
 
-    private void FrameSetCallback(Frameset frameset)
+    private void FramesetCallback(Frameset frameset)
     {
         if(frameset == null)
         {
@@ -225,5 +225,15 @@ public class OrbbecPipelineManager : MonoBehaviour
         }
 
         frameset.Dispose();
+    }
+
+    public void StartAllStream()
+    {
+        pipeline.Start(config, FramesetCallback);
+    }
+    
+    public void StopAllStream()
+    {
+        pipeline.Stop();
     }
 }
