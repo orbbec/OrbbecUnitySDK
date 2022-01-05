@@ -6,7 +6,7 @@ using UnityEngine.UI;
 
 public class ColorImageView : MonoBehaviour
 {
-    public OrbbecManager orbbecManager;
+    public OrbbecPipelineManager orbbecManager;
     public Texture2D colorTexture;
     
     // Start is called before the first frame update

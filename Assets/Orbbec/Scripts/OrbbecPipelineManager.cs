@@ -4,45 +4,23 @@ using UnityEngine;
 using Orbbec;
 using UnityEngine.Events;
 using System.Collections.Concurrent;
+using System;
 
-[System.Serializable]
-public struct ImageMode
+public class OrbbecPipelineManager : MonoBehaviour
 {
-    public int width;
-    public int height;
-    public int fps;
-    public Format format;
-}
-
-public struct ImageData
-{
-    public int width;
-    public int height;
-    public Format format;
-    public byte[] data;
-}
-
-public class OrbbecManager : MonoBehaviour
-{
-
     public ImageMode colorMode;
     public ImageMode depthMode;
     public ImageMode irMode;
     public bool enableColor;
     public bool enableDepth;
     public bool enableIR;
+    public bool autoStart;
     public ImageData colorData;
     public ImageData depthData;
     public ImageData irData;
 
-    // private Pipeline pipeline;
-    // private Config config;
-    private Context context;
-    private DeviceList deviceList;
-    private Device device;
-    private Sensor colorSensor;
-    private Sensor depthSensor;
-    private Sensor irSensor;
+    private Pipeline pipeline;
+    private Config config;
     private StreamProfile[] colorProfiles;
     private StreamProfile[] depthProfiles;
     private StreamProfile[] irProfiles;
@@ -55,9 +33,6 @@ public class OrbbecManager : MonoBehaviour
     // Use this for initialization
     void Start()
     {
-        // pipeline = new Pipeline();
-        // config = new Config();
-        // device = pipeline.GetDevice();
         if(!hasInit)
         {
             InitSDK();
@@ -66,15 +41,13 @@ public class OrbbecManager : MonoBehaviour
 
     private void InitSDK()
     {
-        context = new Context();
-        deviceList = context.QueryDeviceList();
-        device = deviceList.GetDevice(0);
-        colorSensor = device.GetSensor(SensorType.OB_SENSOR_COLOR);
-        depthSensor = device.GetSensor(SensorType.OB_SENSOR_DEPTH);
-        irSensor = device.GetSensor(SensorType.OB_SENSOR_IR);
-        colorProfiles = colorSensor.GetStreamProfiles();
-        depthProfiles = depthSensor.GetStreamProfiles();
-        irProfiles = irSensor.GetStreamProfiles();
+        pipeline = new Pipeline();
+        config = new Config();
+
+        colorProfiles = pipeline.GetStreamProfiles(SensorType.OB_SENSOR_COLOR);
+        depthProfiles = pipeline.GetStreamProfiles(SensorType.OB_SENSOR_DEPTH);
+        irProfiles = pipeline.GetStreamProfiles(SensorType.OB_SENSOR_IR);
+        
         foreach (var profile in colorProfiles)
         {
             if (profile.GetWidth() == colorMode.width &&
@@ -147,20 +120,25 @@ public class OrbbecManager : MonoBehaviour
                         irProfile.GetFPS(), 
                         irProfile.GetFormat()));
         }
+        
         if (enableColor)
         {
-            colorSensor.Start(colorProfile, ColorFrameCallback);
+            config.EnableStream(colorProfile);
             Debug.Log("auto start color stream");
         }
         if (enableDepth)
         {
-            depthSensor.Start(depthProfile, DepthFrameCallback);
+            config.EnableStream(depthProfile);
             Debug.Log("auto start depth stream");
         }
         if (enableIR)
         {
-            irSensor.Start(irProfile, IRFrameCallback);
+            config.EnableStream(irProfile);
             Debug.Log("auto start ir stream");
+        }
+        if(autoStart)
+        {
+            pipeline.Start(config, FrameSetCallback);
         }
         Debug.Log("SDK has intialized");
         hasInit = true;
@@ -176,9 +154,6 @@ public class OrbbecManager : MonoBehaviour
 
     private void ReleaseSDK()
     {
-        colorSensor.Dispose();
-        depthSensor.Dispose();
-        irSensor.Dispose();
         foreach (var profile in colorProfiles)
         {
             profile.Dispose();
@@ -191,70 +166,64 @@ public class OrbbecManager : MonoBehaviour
         {
             profile.Dispose();
         }
-        device.Dispose();
-        deviceList.Dispose();
-        context.Dispose();
+        config.Dispose();
+        pipeline.Dispose();
         Debug.Log("SDK has released");
         hasInit = false;
     }
 
-    private void ColorFrameCallback(Frame frame)
+    private void FrameSetCallback(Frameset frameset)
     {
-        if(frame == null)
+        if(frameset == null)
         {
             return;
         }
-        // Debug.Log(frame.GetFrameType());
-        ColorFrame colorFrame = frame as ColorFrame;
-        int dataSize = (int)colorFrame.GetDataSize();
-        if(colorData.data == null || colorData.data.Length != dataSize)
-        {
-            colorData.data = new byte[dataSize];
-        }
-        colorFrame.CopyData(ref colorData.data);
-        colorData.width = (int)colorFrame.GetWidth();
-        colorData.height = (int)colorFrame.GetHeight();
-        colorData.format = colorFrame.GetFormat();
-        frame.Dispose();
-    }
 
-    private void DepthFrameCallback(Frame frame)
-    {
-        if(frame == null)
+        ColorFrame colorFrame = frameset.GetColorFrame();
+        if(colorFrame != null)
         {
-            return;
+            int dataSize = (int)colorFrame.GetDataSize();
+            if(colorData.data == null || colorData.data.Length != dataSize)
+            {
+                colorData.data = new byte[dataSize];
+            }
+            colorFrame.CopyData(ref colorData.data);
+            colorData.width = (int)colorFrame.GetWidth();
+            colorData.height = (int)colorFrame.GetHeight();
+            colorData.format = colorFrame.GetFormat();
+            colorFrame.Dispose();
         }
-        // Debug.Log(frame.GetFrameType());
-        DepthFrame depthFrame = frame as DepthFrame;
-        int dataSize = (int)depthFrame.GetDataSize();
-        if(depthData.data == null || depthData.data.Length != dataSize)
-        {
-            depthData.data = new byte[dataSize];
-        }
-        depthFrame.CopyData(ref depthData.data);
-        depthData.width = (int)depthFrame.GetWidth();
-        depthData.height = (int)depthFrame.GetHeight();
-        depthData.format = depthFrame.GetFormat();
-        frame.Dispose();
-    }
 
-    private void IRFrameCallback(Frame frame)
-    {
-        if(frame == null)
+        DepthFrame depthFrame = frameset.GetDepthFrame();
+        if(depthFrame != null)
         {
-            return;
+            int dataSize = (int)depthFrame.GetDataSize();
+            if(depthData.data == null || depthData.data.Length != dataSize)
+            {
+                depthData.data = new byte[dataSize];
+            }
+            depthFrame.CopyData(ref depthData.data);
+            depthData.width = (int)depthFrame.GetWidth();
+            depthData.height = (int)depthFrame.GetHeight();
+            depthData.format = depthFrame.GetFormat();
+            depthFrame.Dispose();
         }
-        // Debug.Log(frame.GetFrameType());
-        IRFrame irFrame = frame as IRFrame;
-        int dataSize = (int)irFrame.GetDataSize();
-        if(irData.data == null || irData.data.Length != dataSize)
+
+        IRFrame irFrame = frameset.GetIRFrame();
+        if(irFrame != null)
         {
-            irData.data = new byte[dataSize];
+            int dataSize = (int)irFrame.GetDataSize();
+            if(irData.data == null || irData.data.Length != dataSize)
+            {
+                irData.data = new byte[dataSize];
+            }
+            irFrame.CopyData(ref irData.data);
+            irData.width = (int)irFrame.GetWidth();
+            irData.height = (int)irFrame.GetHeight();
+            irData.format = irFrame.GetFormat();
+            irFrame.Dispose();
         }
-        irFrame.CopyData(ref irData.data);
-        irData.width = (int)irFrame.GetWidth();
-        irData.height = (int)irFrame.GetHeight();
-        irData.format = irFrame.GetFormat();
-        frame.Dispose();
+
+        frameset.Dispose();
     }
 }

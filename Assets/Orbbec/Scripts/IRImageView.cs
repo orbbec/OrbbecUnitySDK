@@ -6,7 +6,7 @@ using UnityEngine.UI;
 
 public class IRImageView : MonoBehaviour
 {
-    public OrbbecManager orbbecManager;
+    public OrbbecPipelineManager orbbecManager;
     public Texture2D irTexture;
     
     // Start is called before the first frame update

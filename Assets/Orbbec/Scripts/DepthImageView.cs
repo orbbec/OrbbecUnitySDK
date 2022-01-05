@@ -6,7 +6,7 @@ using UnityEngine.UI;
 
 public class DepthImageView : MonoBehaviour
 {
-    public OrbbecManager orbbecManager;
+    public OrbbecPipelineManager orbbecManager;
     public Texture2D depthTexture;
     
     // Start is called before the first frame update
