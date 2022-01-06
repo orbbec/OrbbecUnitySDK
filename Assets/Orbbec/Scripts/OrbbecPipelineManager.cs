@@ -2,8 +2,6 @@
 using System.Collections.Generic;
 using UnityEngine;
 using Orbbec;
-using UnityEngine.Events;
-using System.Collections.Concurrent;
 
 public class OrbbecPipelineManager : MonoBehaviour, OrbbecManager
 {
@@ -44,7 +42,9 @@ public class OrbbecPipelineManager : MonoBehaviour, OrbbecManager
                                     Version.GetMajorVersion(), 
                                     Version.GetMinorVersion(), 
                                     Version.GetPatchVersion()));
-
+#if !UNITY_EDITOR && UNITY_ANDROID
+        AndroidDeviceManager.Init();
+#endif
         pipeline = new Pipeline();
         config = new Config();
 

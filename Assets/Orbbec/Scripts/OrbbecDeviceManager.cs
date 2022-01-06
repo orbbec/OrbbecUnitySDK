@@ -2,8 +2,6 @@
 using System.Collections.Generic;
 using UnityEngine;
 using Orbbec;
-using UnityEngine.Events;
-using System.Collections.Concurrent;
 
 [System.Serializable]
 public struct ImageMode
@@ -65,6 +63,9 @@ public class OrbbecDeviceManager : MonoBehaviour, OrbbecManager
                                     Version.GetMajorVersion(), 
                                     Version.GetMinorVersion(), 
                                     Version.GetPatchVersion()));
+#if !UNITY_EDITOR && UNITY_ANDROID
+        AndroidDeviceManager.Init();
+#endif
         context = new Context();
         deviceList = context.QueryDeviceList();
         device = deviceList.GetDevice(0);
