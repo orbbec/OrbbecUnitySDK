@@ -6,7 +6,7 @@ using UnityEngine.Events;
 using System.Collections.Concurrent;
 using System;
 
-public class OrbbecPipelineManager : MonoBehaviour
+public class OrbbecPipelineManager : MonoBehaviour, OrbbecManager
 {
     public ImageMode colorMode;
     public ImageMode depthMode;
@@ -15,9 +15,6 @@ public class OrbbecPipelineManager : MonoBehaviour
     public bool enableDepth;
     public bool enableIR;
     public bool autoStart;
-    public ImageData colorData;
-    public ImageData depthData;
-    public ImageData irData;
 
     private Pipeline pipeline;
     private Config config;
@@ -27,6 +24,9 @@ public class OrbbecPipelineManager : MonoBehaviour
     private StreamProfile colorProfile;
     private StreamProfile depthProfile;
     private StreamProfile irProfile;
+    private StreamData colorData;
+    private StreamData depthData;
+    private StreamData irData;
 
     private bool hasInit = false;
 
@@ -183,6 +183,10 @@ public class OrbbecPipelineManager : MonoBehaviour
         if(colorFrame != null)
         {
             int dataSize = (int)colorFrame.GetDataSize();
+            if(colorData == null)
+            {
+                colorData = new StreamData();
+            }
             if(colorData.data == null || colorData.data.Length != dataSize)
             {
                 colorData.data = new byte[dataSize];
@@ -198,6 +202,10 @@ public class OrbbecPipelineManager : MonoBehaviour
         if(depthFrame != null)
         {
             int dataSize = (int)depthFrame.GetDataSize();
+            if(depthData == null)
+            {
+                depthData = new StreamData();
+            }
             if(depthData.data == null || depthData.data.Length != dataSize)
             {
                 depthData.data = new byte[dataSize];
@@ -213,6 +221,10 @@ public class OrbbecPipelineManager : MonoBehaviour
         if(irFrame != null)
         {
             int dataSize = (int)irFrame.GetDataSize();
+            if(irData == null)
+            {
+                irData = new StreamData();
+            }
             if(irData.data == null || irData.data.Length != dataSize)
             {
                 irData.data = new byte[dataSize];
@@ -227,13 +239,88 @@ public class OrbbecPipelineManager : MonoBehaviour
         frameset.Dispose();
     }
 
+    public void StartStream(StreamType streamType)
+    {
+        switch (streamType)
+        {
+            case StreamType.OB_STREAM_COLOR:
+                config.EnableStream(colorProfile);
+                break;
+            case StreamType.OB_STREAM_DEPTH:
+                config.EnableStream(depthProfile);
+                break;
+            case StreamType.OB_STREAM_IR:
+                config.EnableStream(irProfile);
+                break;
+        }
+        pipeline.Stop();
+        pipeline.Start(config, FramesetCallback);
+    }
+    
+    public void StopStream(StreamType streamType)
+    {
+        
+        config.DisableStream(streamType);
+        pipeline.Stop();
+        pipeline.Start(config, FramesetCallback);
+    }
+
     public void StartAllStream()
     {
+        config.EnableAllStream();
+        pipeline.Stop();
         pipeline.Start(config, FramesetCallback);
     }
     
     public void StopAllStream()
     {
         pipeline.Stop();
+    }
+
+    public StreamProfile GetStreamProfile(StreamType streamType)
+    {
+        switch (streamType)
+        {
+            case StreamType.OB_STREAM_COLOR:
+                return colorProfile;
+            case StreamType.OB_STREAM_DEPTH:
+                return depthProfile;
+            case StreamType.OB_STREAM_IR:
+                return irProfile;
+        }
+        Debug.Log(string.Format("no stream type: {0} profile found", streamType));
+        return null;
+    }
+
+    public void SetStreamProfile(StreamType streamType, StreamProfile profile)
+    {
+        switch (streamType)
+        {
+            case StreamType.OB_STREAM_COLOR:
+                colorProfile = profile;
+                return;
+            case StreamType.OB_STREAM_DEPTH:
+                depthProfile = profile;
+                return;
+            case StreamType.OB_STREAM_IR:
+                irProfile = profile;
+                return;
+        }
+        Debug.Log(string.Format("no stream type: {0} profile found", streamType));
+    }
+
+    public StreamData GetStreamData(StreamType streamType)
+    {
+        switch (streamType)
+        {
+            case StreamType.OB_STREAM_COLOR:
+                return colorData;
+            case StreamType.OB_STREAM_DEPTH:
+                return depthData;
+            case StreamType.OB_STREAM_IR:
+                return irData;
+        }
+        Debug.Log(string.Format("no stream type: {0} data found", streamType));
+        return null;
     }
 }

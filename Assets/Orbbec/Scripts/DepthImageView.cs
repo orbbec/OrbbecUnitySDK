@@ -6,12 +6,17 @@ using UnityEngine.UI;
 
 public class DepthImageView : MonoBehaviour
 {
-    public OrbbecPipelineManager orbbecManager;
+    public OrbbecManager orbbecManager;
     public Texture2D depthTexture;
     
     // Start is called before the first frame update
     void Start()
     {
+        orbbecManager = FindObjectOfType<OrbbecDeviceManager>();
+        if(orbbecManager == null)
+        {
+            orbbecManager = FindObjectOfType<OrbbecPipelineManager>();
+        }
         depthTexture = new Texture2D(0, 0, TextureFormat.YUY2, false);
         // GetComponent<RawImage>().texture = depthTexture;
         GetComponent<Renderer>().material.mainTexture = depthTexture;
@@ -20,7 +25,11 @@ public class DepthImageView : MonoBehaviour
     // Update is called once per frame
     void Update()
     {
-        ImageData imageData = orbbecManager.depthData;
+        StreamData imageData = orbbecManager.GetStreamData(StreamType.OB_STREAM_DEPTH);
+        if(imageData == null)
+        {
+            return;
+        }
         if (imageData.format == Format.OB_FORMAT_Y16)
         {
             if(depthTexture.width != imageData.width || depthTexture.height != imageData.height)

@@ -6,12 +6,17 @@ using UnityEngine.UI;
 
 public class IRImageView : MonoBehaviour
 {
-    public OrbbecPipelineManager orbbecManager;
+    public OrbbecManager orbbecManager;
     public Texture2D irTexture;
     
     // Start is called before the first frame update
     void Start()
     {
+        orbbecManager = FindObjectOfType<OrbbecDeviceManager>();
+        if(orbbecManager == null)
+        {
+            orbbecManager = FindObjectOfType<OrbbecPipelineManager>();
+        }
         irTexture = new Texture2D(0, 0, TextureFormat.YUY2, false);
         // GetComponent<RawImage>().texture = irTexture;
         GetComponent<Renderer>().material.mainTexture = irTexture;
@@ -20,7 +25,11 @@ public class IRImageView : MonoBehaviour
     // Update is called once per frame
     void Update()
     {
-        ImageData imageData = orbbecManager.irData;
+        StreamData imageData = orbbecManager.GetStreamData(StreamType.OB_STREAM_IR);
+        if(imageData == null)
+        {
+            return;
+        }
         if (imageData.format == Format.OB_FORMAT_Y16)
         {
             if(irTexture.width != imageData.width || irTexture.height != imageData.height)
