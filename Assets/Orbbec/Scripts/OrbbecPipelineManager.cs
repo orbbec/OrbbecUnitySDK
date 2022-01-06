@@ -4,7 +4,6 @@ using UnityEngine;
 using Orbbec;
 using UnityEngine.Events;
 using System.Collections.Concurrent;
-using System;
 
 public class OrbbecPipelineManager : MonoBehaviour, OrbbecManager
 {
@@ -41,6 +40,11 @@ public class OrbbecPipelineManager : MonoBehaviour, OrbbecManager
 
     private void InitSDK()
     {
+        Debug.Log(string.Format("Orbbec SDK version: {0}.{1}.{2}", 
+                                    Version.GetMajorVersion(), 
+                                    Version.GetMinorVersion(), 
+                                    Version.GetPatchVersion()));
+
         pipeline = new Pipeline();
         config = new Config();
 

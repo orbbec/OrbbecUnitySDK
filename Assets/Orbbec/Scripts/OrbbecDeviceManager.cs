@@ -61,6 +61,10 @@ public class OrbbecDeviceManager : MonoBehaviour, OrbbecManager
 
     private void InitSDK()
     {
+        Debug.Log(string.Format("Orbbec SDK version: {0}.{1}.{2}", 
+                                    Version.GetMajorVersion(), 
+                                    Version.GetMinorVersion(), 
+                                    Version.GetPatchVersion()));
         context = new Context();
         deviceList = context.QueryDeviceList();
         device = deviceList.GetDevice(0);
@@ -355,6 +359,26 @@ public class OrbbecDeviceManager : MonoBehaviour, OrbbecManager
                 return irData;
         }
         Debug.Log(string.Format("no stream type: {0} data found", streamType));
+        return null;
+    }
+
+    public Device GetDevice()
+    {
+        return device;
+    }
+
+    public Sensor GetSensor(SensorType sensorType)
+    {
+        switch(sensorType)
+        {
+            case SensorType.OB_SENSOR_COLOR:
+                return colorSensor;
+            case SensorType.OB_SENSOR_DEPTH:
+                return depthSensor;
+            case SensorType.OB_SENSOR_IR:
+                return irSensor;
+        }
+        Debug.Log(string.Format("no sensor type: {0} found", sensorType));
         return null;
     }
 }
