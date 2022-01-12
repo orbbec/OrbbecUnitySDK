@@ -63,12 +63,27 @@ public class OrbbecDeviceManager : MonoBehaviour, OrbbecManager
                                     Version.GetMajorVersion(), 
                                     Version.GetMinorVersion(), 
                                     Version.GetPatchVersion()));
+        context = new Context();
 #if !UNITY_EDITOR && UNITY_ANDROID
         AndroidDeviceManager.Init();
-#endif
-        context = new Context();
+        context.SetDeviceChangedCallback(OnDeviceChanged);
+#else
         deviceList = context.QueryDeviceList();
-        device = deviceList.GetDevice(0);
+        if(deviceList.DeviceCount() > 0)
+        {
+            device = deviceList.GetDevice(0);
+            OpenDevice();
+            hasInit = true;
+        }
+        else
+        {
+            context.SetDeviceChangedCallback(OnDeviceChanged);
+        }
+#endif
+    }
+
+    private void OpenDevice()
+    {
         colorSensor = device.GetSensor(SensorType.OB_SENSOR_COLOR);
         depthSensor = device.GetSensor(SensorType.OB_SENSOR_DEPTH);
         irSensor = device.GetSensor(SensorType.OB_SENSOR_IR);
@@ -130,12 +145,12 @@ public class OrbbecDeviceManager : MonoBehaviour, OrbbecManager
                 profile.GetFPS() == irMode.fps &&
                 profile.GetFormat() == irMode.format)
             {
+                irProfile = profile;
                 Debug.Log(string.Format("ir profile found: {0}x{1}@{2} {3}", 
                             irProfile.GetWidth(), 
                             irProfile.GetHeight(), 
                             irProfile.GetFPS(), 
                             irProfile.GetFormat()));
-                irProfile = profile;
             }
         }
         if (irProfile == null)
@@ -149,21 +164,33 @@ public class OrbbecDeviceManager : MonoBehaviour, OrbbecManager
         }
         if (enableColor && autoStart)
         {
-            colorSensor.Start(colorProfile, ColorFrameCallback);
+            colorSensor.Start(colorProfile, OnColorFrame);
             Debug.Log("auto start color stream");
         }
         if (enableDepth && autoStart)
         {
-            depthSensor.Start(depthProfile, DepthFrameCallback);
+            depthSensor.Start(depthProfile, OnDepthFrame);
             Debug.Log("auto start depth stream");
         }
         if (enableIR && autoStart)
         {
-            irSensor.Start(irProfile, IRFrameCallback);
+            irSensor.Start(irProfile, OnIRFrame);
             Debug.Log("auto start ir stream");
         }
         Debug.Log("SDK has intialized");
-        hasInit = true;
+    }
+
+    private void OnDeviceChanged(DeviceList removed, DeviceList added)
+    {
+        Debug.Log(string.Format("on device changed: removed count {0}, added count {1}", removed.DeviceCount(), added.DeviceCount()));
+        if(device == null && added.DeviceCount() > 0)
+        {
+            device = added.GetDevice(0);
+            OpenDevice();
+            hasInit = true;
+        }
+        removed.Dispose();
+        added.Dispose();
     }
 
     void OnDestroy()
@@ -176,29 +203,56 @@ public class OrbbecDeviceManager : MonoBehaviour, OrbbecManager
 
     private void ReleaseSDK()
     {
-        colorSensor.Dispose();
-        depthSensor.Dispose();
-        irSensor.Dispose();
-        foreach (var profile in colorProfiles)
+        if(colorSensor != null)
         {
-            profile.Dispose();
+            colorSensor.Dispose();
         }
-        foreach (var profile in depthProfiles)
+        if(depthSensor != null)
         {
-            profile.Dispose();
+            depthSensor.Dispose();
         }
-        foreach (var profile in irProfiles)
+        if(irSensor != null)
         {
-            profile.Dispose();
+            irSensor.Dispose();
         }
-        device.Dispose();
-        deviceList.Dispose();
-        context.Dispose();
+        if(colorProfiles != null)
+        {
+            foreach (var profile in colorProfiles)
+            {
+                profile.Dispose();
+            }
+        }
+        if(depthProfiles != null)
+        {
+            foreach (var profile in depthProfiles)
+            {
+                profile.Dispose();
+            }
+        }
+        if(irProfiles != null)
+        {
+            foreach (var profile in irProfiles)
+            {
+                profile.Dispose();
+            }
+        }
+        if(device != null)
+        {
+            device.Dispose();
+        }
+        if(deviceList != null)
+        {
+            deviceList.Dispose();
+        }
+        if(context != null)
+        {
+            context.Dispose();
+        }
         Debug.Log("SDK has released");
         hasInit = false;
     }
 
-    private void ColorFrameCallback(Frame frame)
+    private void OnColorFrame(Frame frame)
     {
         if(frame == null)
         {
@@ -222,7 +276,7 @@ public class OrbbecDeviceManager : MonoBehaviour, OrbbecManager
         frame.Dispose();
     }
 
-    private void DepthFrameCallback(Frame frame)
+    private void OnDepthFrame(Frame frame)
     {
         if(frame == null)
         {
@@ -246,7 +300,7 @@ public class OrbbecDeviceManager : MonoBehaviour, OrbbecManager
         frame.Dispose();
     }
 
-    private void IRFrameCallback(Frame frame)
+    private void OnIRFrame(Frame frame)
     {
         if(frame == null)
         {
@@ -275,13 +329,13 @@ public class OrbbecDeviceManager : MonoBehaviour, OrbbecManager
         switch (streamType)
         {
             case StreamType.OB_STREAM_COLOR:
-                colorSensor.Start(colorProfile, ColorFrameCallback);
+                colorSensor.Start(colorProfile, OnColorFrame);
                 break;
             case StreamType.OB_STREAM_DEPTH:
-                depthSensor.Start(depthProfile, DepthFrameCallback);
+                depthSensor.Start(depthProfile, OnDepthFrame);
                 break;
             case StreamType.OB_STREAM_IR:
-                irSensor.Start(irProfile, IRFrameCallback);
+                irSensor.Start(irProfile, OnIRFrame);
                 break;
         }
     }
@@ -304,9 +358,9 @@ public class OrbbecDeviceManager : MonoBehaviour, OrbbecManager
 
     public void StartAllStream()
     {
-        colorSensor.Start(colorProfile, ColorFrameCallback);
-        depthSensor.Start(depthProfile, DepthFrameCallback);
-        irSensor.Start(irProfile, IRFrameCallback);
+        colorSensor.Start(colorProfile, OnColorFrame);
+        depthSensor.Start(depthProfile, OnDepthFrame);
+        irSensor.Start(irProfile, OnIRFrame);
     }
     
     public void StopAllStream()
