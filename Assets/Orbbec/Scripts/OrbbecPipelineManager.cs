@@ -13,6 +13,9 @@ public class OrbbecPipelineManager : MonoBehaviour, OrbbecManager
     public bool enableIR;
     public bool autoStart;
 
+    private Context context;
+    private Device device;
+    private DeviceList deviceList;
     private Pipeline pipeline;
     private Config config;
     private StreamProfile[] colorProfiles;
@@ -30,7 +33,7 @@ public class OrbbecPipelineManager : MonoBehaviour, OrbbecManager
     // Use this for initialization
     void Start()
     {
-        if(!hasInit)
+        if (!hasInit)
         {
             InitSDK();
         }
@@ -38,20 +41,37 @@ public class OrbbecPipelineManager : MonoBehaviour, OrbbecManager
 
     private void InitSDK()
     {
-        Debug.Log(string.Format("Orbbec SDK version: {0}.{1}.{2}", 
-                                    Version.GetMajorVersion(), 
-                                    Version.GetMinorVersion(), 
+        Debug.Log(string.Format("Orbbec SDK version: {0}.{1}.{2}",
+                                    Version.GetMajorVersion(),
+                                    Version.GetMinorVersion(),
                                     Version.GetPatchVersion()));
+        context = new Context();
 #if !UNITY_EDITOR && UNITY_ANDROID
         AndroidDeviceManager.Init();
+        context.SetDeviceChangedCallback(OnDeviceChanged);
 #endif
-        pipeline = new Pipeline();
+        deviceList = context.QueryDeviceList();
+        if (deviceList.DeviceCount() > 0)
+        {
+            device = deviceList.GetDevice(0);
+            StartPipeline();
+            hasInit = true;
+        }
+        else
+        {
+            context.SetDeviceChangedCallback(OnDeviceChanged);
+        }
+    }
+
+    private void StartPipeline()
+    {
+        pipeline = new Pipeline(device);
         config = new Config();
 
         colorProfiles = pipeline.GetStreamProfiles(SensorType.OB_SENSOR_COLOR);
         depthProfiles = pipeline.GetStreamProfiles(SensorType.OB_SENSOR_DEPTH);
         irProfiles = pipeline.GetStreamProfiles(SensorType.OB_SENSOR_IR);
-        
+
         foreach (var profile in colorProfiles)
         {
             if (profile.GetWidth() == colorMode.width &&
@@ -60,10 +80,10 @@ public class OrbbecPipelineManager : MonoBehaviour, OrbbecManager
                 profile.GetFormat() == colorMode.format)
             {
                 colorProfile = profile;
-                Debug.Log(string.Format("color profile found: {0}x{1}@{2} {3}", 
-                            colorProfile.GetWidth(), 
-                            colorProfile.GetHeight(), 
-                            colorProfile.GetFPS(), 
+                Debug.Log(string.Format("color profile found: {0}x{1}@{2} {3}",
+                            colorProfile.GetWidth(),
+                            colorProfile.GetHeight(),
+                            colorProfile.GetFPS(),
                             colorProfile.GetFormat()));
             }
         }
@@ -71,9 +91,9 @@ public class OrbbecPipelineManager : MonoBehaviour, OrbbecManager
         {
             colorProfile = colorProfiles[0];
             Debug.Log(string.Format("color profile not found, use default: {0}x{1}@{2} {3}",
-                            colorProfile.GetWidth(), 
-                            colorProfile.GetHeight(), 
-                            colorProfile.GetFPS(), 
+                            colorProfile.GetWidth(),
+                            colorProfile.GetHeight(),
+                            colorProfile.GetFPS(),
                             colorProfile.GetFormat()));
         }
         foreach (var profile in depthProfiles)
@@ -84,10 +104,10 @@ public class OrbbecPipelineManager : MonoBehaviour, OrbbecManager
                 profile.GetFormat() == depthMode.format)
             {
                 depthProfile = profile;
-                Debug.Log(string.Format("depth profile found: {0}x{1}@{2} {3}", 
-                            depthProfile.GetWidth(), 
-                            depthProfile.GetHeight(), 
-                            depthProfile.GetFPS(), 
+                Debug.Log(string.Format("depth profile found: {0}x{1}@{2} {3}",
+                            depthProfile.GetWidth(),
+                            depthProfile.GetHeight(),
+                            depthProfile.GetFPS(),
                             depthProfile.GetFormat()));
             }
         }
@@ -95,9 +115,9 @@ public class OrbbecPipelineManager : MonoBehaviour, OrbbecManager
         {
             depthProfile = depthProfiles[0];
             Debug.Log(string.Format("depth profile not found, use default: {0}x{1}@{2} {3}",
-                        depthProfile.GetWidth(), 
-                        depthProfile.GetHeight(), 
-                        depthProfile.GetFPS(), 
+                        depthProfile.GetWidth(),
+                        depthProfile.GetHeight(),
+                        depthProfile.GetFPS(),
                         depthProfile.GetFormat()));
         }
         foreach (var profile in irProfiles)
@@ -107,24 +127,24 @@ public class OrbbecPipelineManager : MonoBehaviour, OrbbecManager
                 profile.GetFPS() == irMode.fps &&
                 profile.GetFormat() == irMode.format)
             {
-                Debug.Log(string.Format("ir profile found: {0}x{1}@{2} {3}", 
-                            irProfile.GetWidth(), 
-                            irProfile.GetHeight(), 
-                            irProfile.GetFPS(), 
-                            irProfile.GetFormat()));
                 irProfile = profile;
+                Debug.Log(string.Format("ir profile found: {0}x{1}@{2} {3}",
+                            irProfile.GetWidth(),
+                            irProfile.GetHeight(),
+                            irProfile.GetFPS(),
+                            irProfile.GetFormat()));
             }
         }
         if (irProfile == null)
         {
             irProfile = irProfiles[0];
             Debug.Log(string.Format("ir profile not found, use default: {0}x{1}@{2} {3}",
-                        irProfile.GetWidth(), 
-                        irProfile.GetHeight(), 
-                        irProfile.GetFPS(), 
+                        irProfile.GetWidth(),
+                        irProfile.GetHeight(),
+                        irProfile.GetFPS(),
                         irProfile.GetFormat()));
         }
-        
+
         if (enableColor)
         {
             config.EnableStream(colorProfile);
@@ -140,17 +160,29 @@ public class OrbbecPipelineManager : MonoBehaviour, OrbbecManager
             config.EnableStream(irProfile);
             Debug.Log("auto start ir stream");
         }
-        if(autoStart)
+        if (autoStart)
         {
-            pipeline.Start(config, FramesetCallback);
+            pipeline.Start(config, OnFrameset);
+            Debug.Log("pipeline has started");
         }
-        Debug.Log("SDK has intialized");
-        hasInit = true;
+    }
+
+    private void OnDeviceChanged(DeviceList removed, DeviceList added)
+    {
+        Debug.Log(string.Format("on device changed: removed count {0}, added count {1}", removed.DeviceCount(), added.DeviceCount()));
+        if (device == null && added.DeviceCount() > 0)
+        {
+            device = added.GetDevice(0);
+            StartPipeline();
+            hasInit = true;
+        }
+        removed.Dispose();
+        added.Dispose();
     }
 
     void OnDestroy()
     {
-        if(hasInit)
+        if (hasInit)
         {
             ReleaseSDK();
         }
@@ -158,40 +190,68 @@ public class OrbbecPipelineManager : MonoBehaviour, OrbbecManager
 
     private void ReleaseSDK()
     {
-        foreach (var profile in colorProfiles)
+        if (colorProfiles != null)
         {
-            profile.Dispose();
+            foreach (var profile in colorProfiles)
+            {
+                profile.Dispose();
+            }
         }
-        foreach (var profile in depthProfiles)
+        if (depthProfiles != null)
         {
-            profile.Dispose();
+            foreach (var profile in depthProfiles)
+            {
+                profile.Dispose();
+            }
         }
-        foreach (var profile in irProfiles)
+        if (irProfiles != null)
         {
-            profile.Dispose();
+            foreach (var profile in irProfiles)
+            {
+                profile.Dispose();
+            }
         }
-        config.Dispose();
-        pipeline.Dispose();
+        if (config != null)
+        {
+            config.Dispose();
+        }
+        if (pipeline != null)
+        {
+            pipeline.Dispose();
+        }
+        if (device != null)
+        {
+            device.Dispose();
+        }
+        if (deviceList != null)
+        {
+            deviceList.Dispose();
+        }
+        if (context != null)
+        {
+            context.Dispose();
+        }
         Debug.Log("SDK has released");
         hasInit = false;
     }
 
-    private void FramesetCallback(Frameset frameset)
+    private void OnFrameset(Frameset frameset)
     {
-        if(frameset == null)
+        if (frameset == null)
         {
             return;
         }
 
         ColorFrame colorFrame = frameset.GetColorFrame();
-        if(colorFrame != null)
+        if (colorFrame != null)
         {
+            // Debug.Log(colorFrame.GetFrameType());
             int dataSize = (int)colorFrame.GetDataSize();
-            if(colorData == null)
+            if (colorData == null)
             {
                 colorData = new StreamData();
             }
-            if(colorData.data == null || colorData.data.Length != dataSize)
+            if (colorData.data == null || colorData.data.Length != dataSize)
             {
                 colorData.data = new byte[dataSize];
             }
@@ -203,14 +263,15 @@ public class OrbbecPipelineManager : MonoBehaviour, OrbbecManager
         }
 
         DepthFrame depthFrame = frameset.GetDepthFrame();
-        if(depthFrame != null)
+        if (depthFrame != null)
         {
+            // Debug.Log(depthFrame.GetFrameType());
             int dataSize = (int)depthFrame.GetDataSize();
-            if(depthData == null)
+            if (depthData == null)
             {
                 depthData = new StreamData();
             }
-            if(depthData.data == null || depthData.data.Length != dataSize)
+            if (depthData.data == null || depthData.data.Length != dataSize)
             {
                 depthData.data = new byte[dataSize];
             }
@@ -222,14 +283,15 @@ public class OrbbecPipelineManager : MonoBehaviour, OrbbecManager
         }
 
         IRFrame irFrame = frameset.GetIRFrame();
-        if(irFrame != null)
+        if (irFrame != null)
         {
+            // Debug.Log(irFrame.GetFrameType());
             int dataSize = (int)irFrame.GetDataSize();
-            if(irData == null)
+            if (irData == null)
             {
                 irData = new StreamData();
             }
-            if(irData.data == null || irData.data.Length != dataSize)
+            if (irData.data == null || irData.data.Length != dataSize)
             {
                 irData.data = new byte[dataSize];
             }
@@ -258,24 +320,23 @@ public class OrbbecPipelineManager : MonoBehaviour, OrbbecManager
                 break;
         }
         pipeline.Stop();
-        pipeline.Start(config, FramesetCallback);
+        pipeline.Start(config, OnFrameset);
     }
-    
+
     public void StopStream(StreamType streamType)
     {
-        
         config.DisableStream(streamType);
         pipeline.Stop();
-        pipeline.Start(config, FramesetCallback);
+        pipeline.Start(config, OnFrameset);
     }
 
     public void StartAllStream()
     {
         config.EnableAllStream();
         pipeline.Stop();
-        pipeline.Start(config, FramesetCallback);
+        pipeline.Start(config, OnFrameset);
     }
-    
+
     public void StopAllStream()
     {
         pipeline.Stop();

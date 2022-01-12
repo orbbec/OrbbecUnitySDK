@@ -51,7 +51,7 @@ public class OrbbecDeviceManager : MonoBehaviour, OrbbecManager
     // Use this for initialization
     void Start()
     {
-        if(!hasInit)
+        if (!hasInit)
         {
             InitSDK();
         }
@@ -59,9 +59,9 @@ public class OrbbecDeviceManager : MonoBehaviour, OrbbecManager
 
     private void InitSDK()
     {
-        Debug.Log(string.Format("Orbbec SDK version: {0}.{1}.{2}", 
-                                    Version.GetMajorVersion(), 
-                                    Version.GetMinorVersion(), 
+        Debug.Log(string.Format("Orbbec SDK version: {0}.{1}.{2}",
+                                    Version.GetMajorVersion(),
+                                    Version.GetMinorVersion(),
                                     Version.GetPatchVersion()));
         context = new Context();
 #if !UNITY_EDITOR && UNITY_ANDROID
@@ -69,7 +69,7 @@ public class OrbbecDeviceManager : MonoBehaviour, OrbbecManager
         context.SetDeviceChangedCallback(OnDeviceChanged);
 #else
         deviceList = context.QueryDeviceList();
-        if(deviceList.DeviceCount() > 0)
+        if (deviceList.DeviceCount() > 0)
         {
             device = deviceList.GetDevice(0);
             OpenDevice();
@@ -98,10 +98,10 @@ public class OrbbecDeviceManager : MonoBehaviour, OrbbecManager
                 profile.GetFormat() == colorMode.format)
             {
                 colorProfile = profile;
-                Debug.Log(string.Format("color profile found: {0}x{1}@{2} {3}", 
-                            colorProfile.GetWidth(), 
-                            colorProfile.GetHeight(), 
-                            colorProfile.GetFPS(), 
+                Debug.Log(string.Format("color profile found: {0}x{1}@{2} {3}",
+                            colorProfile.GetWidth(),
+                            colorProfile.GetHeight(),
+                            colorProfile.GetFPS(),
                             colorProfile.GetFormat()));
             }
         }
@@ -109,9 +109,9 @@ public class OrbbecDeviceManager : MonoBehaviour, OrbbecManager
         {
             colorProfile = colorProfiles[0];
             Debug.Log(string.Format("color profile not found, use default: {0}x{1}@{2} {3}",
-                            colorProfile.GetWidth(), 
-                            colorProfile.GetHeight(), 
-                            colorProfile.GetFPS(), 
+                            colorProfile.GetWidth(),
+                            colorProfile.GetHeight(),
+                            colorProfile.GetFPS(),
                             colorProfile.GetFormat()));
         }
         foreach (var profile in depthProfiles)
@@ -122,10 +122,10 @@ public class OrbbecDeviceManager : MonoBehaviour, OrbbecManager
                 profile.GetFormat() == depthMode.format)
             {
                 depthProfile = profile;
-                Debug.Log(string.Format("depth profile found: {0}x{1}@{2} {3}", 
-                            depthProfile.GetWidth(), 
-                            depthProfile.GetHeight(), 
-                            depthProfile.GetFPS(), 
+                Debug.Log(string.Format("depth profile found: {0}x{1}@{2} {3}",
+                            depthProfile.GetWidth(),
+                            depthProfile.GetHeight(),
+                            depthProfile.GetFPS(),
                             depthProfile.GetFormat()));
             }
         }
@@ -133,9 +133,9 @@ public class OrbbecDeviceManager : MonoBehaviour, OrbbecManager
         {
             depthProfile = depthProfiles[0];
             Debug.Log(string.Format("depth profile not found, use default: {0}x{1}@{2} {3}",
-                        depthProfile.GetWidth(), 
-                        depthProfile.GetHeight(), 
-                        depthProfile.GetFPS(), 
+                        depthProfile.GetWidth(),
+                        depthProfile.GetHeight(),
+                        depthProfile.GetFPS(),
                         depthProfile.GetFormat()));
         }
         foreach (var profile in irProfiles)
@@ -146,10 +146,10 @@ public class OrbbecDeviceManager : MonoBehaviour, OrbbecManager
                 profile.GetFormat() == irMode.format)
             {
                 irProfile = profile;
-                Debug.Log(string.Format("ir profile found: {0}x{1}@{2} {3}", 
-                            irProfile.GetWidth(), 
-                            irProfile.GetHeight(), 
-                            irProfile.GetFPS(), 
+                Debug.Log(string.Format("ir profile found: {0}x{1}@{2} {3}",
+                            irProfile.GetWidth(),
+                            irProfile.GetHeight(),
+                            irProfile.GetFPS(),
                             irProfile.GetFormat()));
             }
         }
@@ -157,9 +157,9 @@ public class OrbbecDeviceManager : MonoBehaviour, OrbbecManager
         {
             irProfile = irProfiles[0];
             Debug.Log(string.Format("ir profile not found, use default: {0}x{1}@{2} {3}",
-                        irProfile.GetWidth(), 
-                        irProfile.GetHeight(), 
-                        irProfile.GetFPS(), 
+                        irProfile.GetWidth(),
+                        irProfile.GetHeight(),
+                        irProfile.GetFPS(),
                         irProfile.GetFormat()));
         }
         if (enableColor && autoStart)
@@ -177,13 +177,13 @@ public class OrbbecDeviceManager : MonoBehaviour, OrbbecManager
             irSensor.Start(irProfile, OnIRFrame);
             Debug.Log("auto start ir stream");
         }
-        Debug.Log("SDK has intialized");
+        Debug.Log("device has opened");
     }
 
     private void OnDeviceChanged(DeviceList removed, DeviceList added)
     {
         Debug.Log(string.Format("on device changed: removed count {0}, added count {1}", removed.DeviceCount(), added.DeviceCount()));
-        if(device == null && added.DeviceCount() > 0)
+        if (device == null && added.DeviceCount() > 0)
         {
             device = added.GetDevice(0);
             OpenDevice();
@@ -195,7 +195,7 @@ public class OrbbecDeviceManager : MonoBehaviour, OrbbecManager
 
     void OnDestroy()
     {
-        if(hasInit)
+        if (hasInit)
         {
             ReleaseSDK();
         }
@@ -203,48 +203,48 @@ public class OrbbecDeviceManager : MonoBehaviour, OrbbecManager
 
     private void ReleaseSDK()
     {
-        if(colorSensor != null)
+        if (colorSensor != null)
         {
             colorSensor.Dispose();
         }
-        if(depthSensor != null)
+        if (depthSensor != null)
         {
             depthSensor.Dispose();
         }
-        if(irSensor != null)
+        if (irSensor != null)
         {
             irSensor.Dispose();
         }
-        if(colorProfiles != null)
+        if (colorProfiles != null)
         {
             foreach (var profile in colorProfiles)
             {
                 profile.Dispose();
             }
         }
-        if(depthProfiles != null)
+        if (depthProfiles != null)
         {
             foreach (var profile in depthProfiles)
             {
                 profile.Dispose();
             }
         }
-        if(irProfiles != null)
+        if (irProfiles != null)
         {
             foreach (var profile in irProfiles)
             {
                 profile.Dispose();
             }
         }
-        if(device != null)
+        if (device != null)
         {
             device.Dispose();
         }
-        if(deviceList != null)
+        if (deviceList != null)
         {
             deviceList.Dispose();
         }
-        if(context != null)
+        if (context != null)
         {
             context.Dispose();
         }
@@ -254,18 +254,18 @@ public class OrbbecDeviceManager : MonoBehaviour, OrbbecManager
 
     private void OnColorFrame(Frame frame)
     {
-        if(frame == null)
+        if (frame == null)
         {
             return;
         }
         // Debug.Log(frame.GetFrameType());
         ColorFrame colorFrame = frame as ColorFrame;
         int dataSize = (int)colorFrame.GetDataSize();
-        if(colorData == null)
+        if (colorData == null)
         {
             colorData = new StreamData();
         }
-        if(colorData.data == null || colorData.data.Length != dataSize)
+        if (colorData.data == null || colorData.data.Length != dataSize)
         {
             colorData.data = new byte[dataSize];
         }
@@ -278,18 +278,18 @@ public class OrbbecDeviceManager : MonoBehaviour, OrbbecManager
 
     private void OnDepthFrame(Frame frame)
     {
-        if(frame == null)
+        if (frame == null)
         {
             return;
         }
         // Debug.Log(frame.GetFrameType());
         DepthFrame depthFrame = frame as DepthFrame;
         int dataSize = (int)depthFrame.GetDataSize();
-        if(depthData == null)
+        if (depthData == null)
         {
             depthData = new StreamData();
         }
-        if(depthData.data == null || depthData.data.Length != dataSize)
+        if (depthData.data == null || depthData.data.Length != dataSize)
         {
             depthData.data = new byte[dataSize];
         }
@@ -302,18 +302,18 @@ public class OrbbecDeviceManager : MonoBehaviour, OrbbecManager
 
     private void OnIRFrame(Frame frame)
     {
-        if(frame == null)
+        if (frame == null)
         {
             return;
         }
         // Debug.Log(frame.GetFrameType());
         IRFrame irFrame = frame as IRFrame;
         int dataSize = (int)irFrame.GetDataSize();
-        if(irData == null)
+        if (irData == null)
         {
             irData = new StreamData();
         }
-        if(irData.data == null || irData.data.Length != dataSize)
+        if (irData.data == null || irData.data.Length != dataSize)
         {
             irData.data = new byte[dataSize];
         }
@@ -339,7 +339,7 @@ public class OrbbecDeviceManager : MonoBehaviour, OrbbecManager
                 break;
         }
     }
-    
+
     public void StopStream(StreamType streamType)
     {
         switch (streamType)
@@ -362,7 +362,7 @@ public class OrbbecDeviceManager : MonoBehaviour, OrbbecManager
         depthSensor.Start(depthProfile, OnDepthFrame);
         irSensor.Start(irProfile, OnIRFrame);
     }
-    
+
     public void StopAllStream()
     {
         colorSensor.Stop();
@@ -424,7 +424,7 @@ public class OrbbecDeviceManager : MonoBehaviour, OrbbecManager
 
     public Sensor GetSensor(SensorType sensorType)
     {
-        switch(sensorType)
+        switch (sensorType)
         {
             case SensorType.OB_SENSOR_COLOR:
                 return colorSensor;
