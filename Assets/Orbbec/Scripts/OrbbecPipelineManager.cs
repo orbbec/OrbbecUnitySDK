@@ -305,6 +305,11 @@ public class OrbbecPipelineManager : MonoBehaviour, OrbbecManager
         frameset.Dispose();
     }
 
+    public bool HasInit()
+    {
+        return hasInit;
+    }
+
     public void StartStream(StreamType streamType)
     {
         switch (streamType)
@@ -340,6 +345,21 @@ public class OrbbecPipelineManager : MonoBehaviour, OrbbecManager
     public void StopAllStream()
     {
         pipeline.Stop();
+    }
+
+    public StreamProfile[] GetStreamProfiles(StreamType streamType)
+    {
+        switch (streamType)
+        {
+            case StreamType.OB_STREAM_COLOR:
+                return colorProfiles;
+            case StreamType.OB_STREAM_DEPTH:
+                return depthProfiles;
+            case StreamType.OB_STREAM_IR:
+                return irProfiles;
+        }
+        Debug.Log(string.Format("no stream type: {0} profiles found", streamType));
+        return null;
     }
 
     public StreamProfile GetStreamProfile(StreamType streamType)
