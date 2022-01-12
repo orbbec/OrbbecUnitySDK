@@ -17,7 +17,7 @@ public class IRImageView : MonoBehaviour
         {
             orbbecManager = FindObjectOfType<OrbbecPipelineManager>();
         }
-        irTexture = new Texture2D(0, 0, TextureFormat.YUY2, false);
+        irTexture = new Texture2D(0, 0, TextureFormat.RG16, false);
         // GetComponent<RawImage>().texture = irTexture;
         GetComponent<Renderer>().material.mainTexture = irTexture;
     }

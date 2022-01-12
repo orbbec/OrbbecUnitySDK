@@ -17,7 +17,7 @@ public class DepthImageView : MonoBehaviour
         {
             orbbecManager = FindObjectOfType<OrbbecPipelineManager>();
         }
-        depthTexture = new Texture2D(0, 0, TextureFormat.YUY2, false);
+        depthTexture = new Texture2D(0, 0, TextureFormat.RG16, false);
         // GetComponent<RawImage>().texture = depthTexture;
         GetComponent<Renderer>().material.mainTexture = depthTexture;
     }
