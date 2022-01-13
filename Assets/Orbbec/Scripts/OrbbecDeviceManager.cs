@@ -48,6 +48,8 @@ public class OrbbecDeviceManager : MonoBehaviour, OrbbecManager
 
     private bool hasInit = false;
 
+    private OrbbecInitHandle initHandle;
+
     // Use this for initialization
     void Start()
     {
@@ -74,6 +76,10 @@ public class OrbbecDeviceManager : MonoBehaviour, OrbbecManager
             device = deviceList.GetDevice(0);
             OpenDevice();
             hasInit = true;
+            if(initHandle != null)
+            {
+                initHandle.Invoke();
+            }
         }
         else
         {
@@ -188,6 +194,10 @@ public class OrbbecDeviceManager : MonoBehaviour, OrbbecManager
             device = added.GetDevice(0);
             OpenDevice();
             hasInit = true;
+            if(initHandle != null)
+            {
+                initHandle.Invoke();
+            }
         }
         removed.Dispose();
         added.Dispose();
@@ -361,14 +371,14 @@ public class OrbbecDeviceManager : MonoBehaviour, OrbbecManager
         }
     }
 
-    public void StartAllStream()
+    public void StartAllStreams()
     {
         colorSensor.Start(colorProfile, OnColorFrame);
         depthSensor.Start(depthProfile, OnDepthFrame);
         irSensor.Start(irProfile, OnIRFrame);
     }
 
-    public void StopAllStream()
+    public void StopAllStreams()
     {
         colorSensor.Stop();
         depthSensor.Stop();
@@ -455,5 +465,10 @@ public class OrbbecDeviceManager : MonoBehaviour, OrbbecManager
         }
         Debug.Log(string.Format("no sensor type: {0} found", sensorType));
         return null;
+    }
+
+    public void SetInitHandle(OrbbecInitHandle handle)
+    {
+        initHandle = handle;
     }
 }

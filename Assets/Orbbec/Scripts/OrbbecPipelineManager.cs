@@ -30,6 +30,8 @@ public class OrbbecPipelineManager : MonoBehaviour, OrbbecManager
 
     private bool hasInit = false;
 
+    private OrbbecInitHandle initHandle;
+
     // Use this for initialization
     void Start()
     {
@@ -56,6 +58,10 @@ public class OrbbecPipelineManager : MonoBehaviour, OrbbecManager
             device = deviceList.GetDevice(0);
             StartPipeline();
             hasInit = true;
+            if(initHandle != null)
+            {
+                initHandle.Invoke();
+            }
         }
         else
         {
@@ -175,6 +181,10 @@ public class OrbbecPipelineManager : MonoBehaviour, OrbbecManager
             device = added.GetDevice(0);
             StartPipeline();
             hasInit = true;
+            if(initHandle != null)
+            {
+                initHandle.Invoke();
+            }
         }
         removed.Dispose();
         added.Dispose();
@@ -335,14 +345,25 @@ public class OrbbecPipelineManager : MonoBehaviour, OrbbecManager
         pipeline.Start(config, OnFrameset);
     }
 
-    public void StartAllStream()
+    public void StartAllStreams()
     {
         config.EnableAllStream();
         pipeline.Stop();
         pipeline.Start(config, OnFrameset);
     }
 
-    public void StopAllStream()
+    public void StopAllStreams()
+    {
+        config.DisableAllStream();
+        pipeline.Stop();
+    }
+
+    public void StartDefaultStreams()
+    {
+        pipeline.Start(config, OnFrameset);
+    }
+
+    public void StopDefaultStreams()
     {
         pipeline.Stop();
     }
@@ -407,5 +428,20 @@ public class OrbbecPipelineManager : MonoBehaviour, OrbbecManager
         }
         Debug.Log(string.Format("no stream type: {0} data found", streamType));
         return null;
+    }
+
+    public Device GetDevice()
+    {
+        return device;
+    }
+
+    public Pipeline GetPipeline()
+    {
+        return pipeline;
+    }
+
+    public void SetInitHandle(OrbbecInitHandle handle)
+    {
+        initHandle = handle;
     }
 }
