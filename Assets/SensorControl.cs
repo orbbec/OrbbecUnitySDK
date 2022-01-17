@@ -117,6 +117,10 @@ public class SensorControl : MonoBehaviour {
             //     initHandle.Invoke();
             // }
         }
+		else
+		{
+			UpdateUI();
+		}
         
         removed.Dispose();
         added.Dispose();
@@ -462,6 +466,14 @@ public class SensorControl : MonoBehaviour {
 
 	private void UpdateUI()
 	{
+		List<string> deviceNames = new List<string>();
+		foreach (var device in devices)
+		{
+			deviceNames.Add(device.GetDeviceInfo().Name());
+		}
+		deviceSelector.ClearOptions();
+		deviceSelector.AddOptions(deviceNames);
+
 		List<string> sensorNames = new List<string>(){"OB_DEVICE"};
 		foreach (var sensor in sensors)
 		{
