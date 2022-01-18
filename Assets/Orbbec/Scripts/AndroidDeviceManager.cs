@@ -15,4 +15,10 @@ public class AndroidDeviceManager
         // UsbPermissionUtil.CallStatic("requestPermission", currentActivity);
         Debug.Log("android device has init");
     }
+
+    public static void Close()
+    {
+        Debug.Log("close android device");
+        UsbPermissionUtil.CallStatic("closeUsbDevice");
+    }
 }

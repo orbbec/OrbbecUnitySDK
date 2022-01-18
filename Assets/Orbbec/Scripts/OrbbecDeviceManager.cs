@@ -323,9 +323,21 @@ public class OrbbecDeviceManager : MonoBehaviour, OrbbecManager
             colorData.data = new byte[dataSize];
         }
         colorFrame.CopyData(ref colorData.data);
-        colorData.width = (int)colorFrame.GetWidth();
-        colorData.height = (int)colorFrame.GetHeight();
-        colorData.format = colorFrame.GetFormat();
+        if ( colorData.data[ 0 ] != 0xff || 
+                colorData.data[ 1 ] != 0xd8 || 
+                ( colorData.data[ dataSize - 2 ] != 0xff && 
+                colorData.data[ dataSize - 2 - 2 ] != 0 && 
+                colorData.data[ dataSize - 2 - 2 ] != 0xd9 ) || 
+                ( colorData.data[ dataSize - 2 - 1 ] != 0xd9 && 
+                colorData.data[ dataSize - 2 - 1 ] != 0 ) ) {
+            colorData = null;
+        }
+        else
+        {
+            colorData.width = (int)colorFrame.GetWidth();
+            colorData.height = (int)colorFrame.GetHeight();
+            colorData.format = colorFrame.GetFormat();
+        }
         frame.Dispose();
     }
 
