@@ -18,9 +18,8 @@ public class SensorControl : MonoBehaviour {
 
 	private Context context;
     private DeviceList deviceList;
-    private List<Device> devices;
-    private Device currentDevice;
 	private SensorList sensorList;
+    private List<Device> devices;
     private List<Sensor> sensors;
 	private List<PropertyId> propertyIds;
 
@@ -62,15 +61,8 @@ public class SensorControl : MonoBehaviour {
                 Device device = deviceList.GetDevice(i);
                 devices.Add(device);
             }
-			curDevice = devices[0];
-            UpdateSensors(0);
-			UpdateProperties(0);
             hasInit = true;
-			InitUI();
-            // if(initHandle != null)
-            // {
-            //     initHandle.Invoke();
-            // }
+			OnDeviceInit();
         }
 #endif
     }
@@ -78,65 +70,161 @@ public class SensorControl : MonoBehaviour {
 	private void OnDeviceChanged(DeviceList removed, DeviceList added)
     {
         Debug.Log(string.Format("on device changed: removed count {0}, added count {1}", removed.DeviceCount(), added.DeviceCount()));
-        for(uint i = 0; i < added.DeviceCount(); i++)
-        {
-            Device device = added.GetDevice(i);
-            devices.Add(device);
-            Debug.Log(string.Format("added device: {0} {1} {2} {3}", added.Name(i), added.Vid(i), added.Pid(i), added.Uid(i)));
-        }
-        for(uint i = 0; i < removed.DeviceCount(); i++)
-        {
-            Debug.Log(string.Format("removed device: {0} {1} {2} {3}", removed.Name(i), removed.Vid(i), removed.Pid(i), removed.Uid(i)));
-            if(removed.Uid(i) == currentDevice.GetDeviceInfo().Uid())
-            {
-                ReleaseSensors();
-                devices.Remove(currentDevice);
-                hasInit = false;
-            }
-            else
-            {
-                for(int j = devices.Count - 1; j >= 0; j--)
-                {
-                    if(removed.Uid(i) == devices[j].GetDeviceInfo().Uid())
-                    {
-                        devices.RemoveAt(j);
-                    }
-                }
-            }
-        }
-
-        if(!hasInit)
-        {
-			curDevice = devices[0];
-            UpdateSensors(0);
-			UpdateProperties(0);
-            hasInit = true;
-			InitUI();
-            // if(initHandle != null)
-            // {
-            //     initHandle.Invoke();
-            // }
-        }
-		else
+        if(added.DeviceCount() > 0)
 		{
-			UpdateUI();
+			for(uint i = 0; i < added.DeviceCount(); i++)
+			{
+				Device device = added.GetDevice(i);
+				devices.Add(device);
+				Debug.Log(string.Format("added device: {0} {1} {2} {3}", added.Name(i), added.Vid(i), added.Pid(i), added.Uid(i)));
+			}
+
+			if(!hasInit)
+			{
+				hasInit = true;
+				OnDeviceInit();
+			}
+			else
+			{
+				OnDeviceAdd();
+			}
 		}
-        
+
         removed.Dispose();
         added.Dispose();
     }
 
+	private void OnDeviceInit()
+	{
+		curDevice = devices[0];
+		curSensor = null;
+		curProperty = (PropertyId)(-1);
+		UpdateSensors();
+		UpdateProperties();
+
+		InitUI();
+		UpdateDeviceSelector();
+	}
+
+	private void OnDeviceAdd()
+	{
+		UpdateDeviceSelector();
+	}
+
+	private void UpdateSensors()
+	{
+		sensors.Clear();
+		sensorList = curDevice.GetSensorList();
+		for(uint i = 0; i < sensorList.SensorCount(); i++)
+		{
+			Sensor sensor = sensorList.GetSensor(i);
+			sensors.Add(sensor);
+			curSensor = null;
+		}
+	}
+
+	private void UpdateProperties()
+	{
+		propertyIds.Clear();
+		if(curSensor == null)
+		{
+			for(int id = 0; id <= 85; id++)
+			{
+				PropertyId propertyId = (PropertyId)id;
+				if(curDevice.IsPropertySupported(propertyId))
+				{
+					propertyIds.Add(propertyId);
+				}
+			}
+			for(int id = 3000; id <= 3006; id++)
+			{
+				PropertyId propertyId = (PropertyId)id;
+				if(curDevice.IsPropertySupported(propertyId))
+				{
+					propertyIds.Add(propertyId);
+				}
+			}
+		}
+		else
+		{
+			for(int id = 2000; id <= 2024; id++)
+			{
+				PropertyId propertyId = (PropertyId)id;
+				if(curSensor.IsPropertySupported(propertyId))
+				{
+					propertyIds.Add(propertyId);
+				}
+			}
+		}
+		if(propertyIds.Count > 0)
+		{
+			curProperty = propertyIds[0];
+		}
+	}
+
 	private void InitUI()
 	{
+		deviceSelector.onValueChanged.AddListener(OnDeviceSelect);
+		sensorSelector.onValueChanged.AddListener(OnSensorSelect);
+		propertySelector.onValueChanged.AddListener(OnPropertySelect);
+
+		getButton.onClick.AddListener(OnGetProperty);
+		setButton.onClick.AddListener(OnSetProperty);
+	}
+
+	private void OnDeviceSelect(int index)
+	{
+		curDevice = devices[index];
+		UpdateSensors();
+		UpdateProperties();
+		UpdateSensorSelector();
+		Debug.Log("DeviceSelect: " + curDevice.GetDeviceInfo().Name());
+		PrintLog("DeviceSelect: " + curDevice.GetDeviceInfo().Name());
+	}
+
+	private void OnSensorSelect(int index)
+	{
+		if(index == 0)
+		{
+			curSensor = null;
+			Debug.Log("SensorSelect: " + "OB_DEVICE");
+			PrintLog("SensorSelect: " + "OB_DEVICE");
+		}
+		else
+		{
+			curSensor = sensors[index - 1];
+			Debug.Log("SensorSelect: " + curSensor.GetSensorType().ToString());
+			PrintLog("SensorSelect: " + curSensor.GetSensorType().ToString());
+		}
+		UpdateProperties();
+		UpdatePropertySelector();
+	}
+
+	private void OnPropertySelect(int index)
+	{
+		curProperty = propertyIds[index];
+
+		string propertyStr = curProperty.ToString();
+		Debug.Log("PropertySelect: " + propertyStr);
+		PrintLog("PropertySelect: " + propertyStr);
+	}
+
+	private void UpdateDeviceSelector()
+	{
 		List<string> deviceNames = new List<string>();
-		foreach(var device in devices)
+		foreach (var device in devices)
 		{
 			deviceNames.Add(device.GetDeviceInfo().Name());
 		}
 		deviceSelector.ClearOptions();
 		deviceSelector.AddOptions(deviceNames);
-		deviceSelector.onValueChanged.AddListener(OnDeviceSelect);
+		deviceSelector.value = 0;
 
+		UpdateSensorSelector();
+	}
+
+	private void UpdateSensorSelector()
+	{
 		List<string> sensorNames = new List<string>(){"OB_DEVICE"};
 		foreach (var sensor in sensors)
 		{
@@ -144,8 +232,13 @@ public class SensorControl : MonoBehaviour {
 		}
 		sensorSelector.ClearOptions();
 		sensorSelector.AddOptions(sensorNames);
-		sensorSelector.onValueChanged.AddListener(OnSensorSelect);
+		sensorSelector.value = 0;
 
+		UpdatePropertySelector();
+	}
+
+	private void UpdatePropertySelector()
+	{
 		List<string> propertyNames = new List<string>();
 		foreach (var property in propertyIds)
 		{
@@ -153,19 +246,22 @@ public class SensorControl : MonoBehaviour {
 		}
 		propertySelector.ClearOptions();
 		propertySelector.AddOptions(propertyNames);
-		propertySelector.onValueChanged.AddListener(OnPropertySelect);
-
-		getButton.onClick.AddListener(OnGetProperty);
-		setButton.onClick.AddListener(OnSetProperty);
+		propertySelector.value = 0;
 	}
 
 	private void OnGetProperty()
 	{
+		if((int)curProperty == -1)
+		{
+			return;
+		}
 		string propertyStr = curProperty.ToString();
-		Debug.Log("OnGetProperty: " + propertyStr);
-		PrintLog("OnGetProperty: " + propertyStr);
+		Debug.Log("GetProperty: " + propertyStr);
+		PrintLog("GetProperty: " + propertyStr);
 
-		if(sensorSelector.value == 0)
+		setText.text = null;
+
+		if(curSensor == null)
 		{
 			if(propertyStr.EndsWith("BOOL"))
 			{
@@ -173,6 +269,8 @@ public class SensorControl : MonoBehaviour {
 				{
 					bool value = curDevice.GetBoolProperty(curProperty);
 					getText.text = (value ? 1 : 0).ToString();
+					BoolPropertyRange range = curDevice.GetBoolPropertyRange(curProperty);
+					((Text)setText.placeholder).text = string.Format("[0-1]");
 				}
 				catch(NativeException e)
 				{
@@ -186,6 +284,8 @@ public class SensorControl : MonoBehaviour {
 				{
 					int value = curDevice.GetIntProperty(curProperty);
 					getText.text = value.ToString();
+					IntPropertyRange range = curDevice.GetIntPropertyRange(curProperty);
+					((Text)setText.placeholder).text = string.Format("[{0}-{1}]", range.min, range.max);
 				}
 				catch(NativeException e)
 				{
@@ -199,6 +299,8 @@ public class SensorControl : MonoBehaviour {
 				{
 					float value = curDevice.GetFloatProperty(curProperty);
 					getText.text = value.ToString();
+					FloatPropertyRange range = curDevice.GetFloatPropertyRange(curProperty);
+					((Text)setText.placeholder).text = string.Format("[{0}-{1}]", range.min, range.max);
 				}
 				catch(NativeException e)
 				{
@@ -214,7 +316,9 @@ public class SensorControl : MonoBehaviour {
 				try
 				{
 					bool value = curSensor.GetBoolProperty(curProperty);
-					getText.text = value.ToString();
+					getText.text = (value ? 1 : 0).ToString();
+					BoolPropertyRange range = curSensor.GetBoolPropertyRange(curProperty);
+					((Text)setText.placeholder).text = string.Format("[0-1]");
 				}
 				catch(NativeException e)
 				{
@@ -228,6 +332,8 @@ public class SensorControl : MonoBehaviour {
 				{
 					int value = curSensor.GetIntProperty(curProperty);
 					getText.text = value.ToString();
+					IntPropertyRange range = curSensor.GetIntPropertyRange(curProperty);
+					((Text)setText.placeholder).text = string.Format("[{0}-{1}]", range.min, range.max);
 				}
 				catch(NativeException e)
 				{
@@ -241,6 +347,8 @@ public class SensorControl : MonoBehaviour {
 				{
 					float value = curSensor.GetFloatProperty(curProperty);
 					getText.text = value.ToString();
+					FloatPropertyRange range = curSensor.GetFloatPropertyRange(curProperty);
+					((Text)setText.placeholder).text = string.Format("[{0}-{1}]", range.min, range.max);
 				}
 				catch(NativeException e)
 				{
@@ -253,11 +361,15 @@ public class SensorControl : MonoBehaviour {
 
 	private void OnSetProperty()
 	{
+		if((int)curProperty == -1)
+		{
+			return;
+		}
 		string propertyStr = curProperty.ToString();
-		Debug.Log("OnSetProperty: " + propertyStr);
-		PrintLog("OnSetProperty: " + propertyStr);
+		Debug.Log("SetProperty: " + propertyStr);
+		PrintLog("SetProperty: " + propertyStr);
 
-		if(sensorSelector.value == 0)
+		if(curSensor == null)
 		{
 			if(propertyStr.EndsWith("BOOL"))
 			{
@@ -341,228 +453,6 @@ public class SensorControl : MonoBehaviour {
 				}
 			}
 		}
-	}
-
-	private void OnDeviceSelect(int value)
-	{
-		curDevice = devices[value];
-		ReleaseSensors();
-		UpdateSensors(value);
-		UpdateUI();
-		Debug.Log("OnDeviceSelect: " + curDevice.GetDeviceInfo().Name());
-		PrintLog("OnDeviceSelect: " + curDevice.GetDeviceInfo().Name());
-	}
-
-	private void OnSensorSelect(int value)
-	{
-		if(value > 0)
-		{
-			curSensor = sensors[value - 1];
-			Debug.Log("OnSensorSelect: " + curSensor.GetSensorType().ToString());
-			PrintLog("OnSensorSelect: " + curSensor.GetSensorType().ToString());
-		}
-		else
-		{
-			Debug.Log("OnSensorSelect: " + "OB_DEVICE");
-			PrintLog("OnSensorSelect: " + "OB_DEVICE");
-		}
-		UpdateProperties(value);
-		UpdateUI();
-	}
-
-	private void OnPropertySelect(int index)
-	{
-		curProperty = propertyIds[index];
-
-		string propertyStr = curProperty.ToString();
-		Debug.Log("OnPropertySelect: " + propertyStr);
-		PrintLog("OnPropertySelect: " + propertyStr);
-
-		if(sensorSelector.value == 0)
-		{
-			if(propertyStr.EndsWith("BOOL"))
-			{
-				try
-				{
-			 		BoolPropertyRange range = curDevice.GetBoolPropertyRange(curProperty);
-					((Text)setText.placeholder).text = string.Format("[{0}-{1}]", range.min ? 1 : 0, range.max ? 1 : 0);
-				}
-				catch(NativeException e)
-				{
-					Debug.Log(e.Message);
-					PrintLog(e.Message);
-				}
-			}
-			else if(propertyStr.EndsWith("INT"))
-			{
-				try
-				{
-					IntPropertyRange range = curDevice.GetIntPropertyRange(curProperty);
-					((Text)setText.placeholder).text = string.Format("[{0}-{1}]", range.min, range.max);
-				}
-				catch(NativeException e)
-				{
-					Debug.Log(e.Message);
-					PrintLog(e.Message);
-				}
-			}
-			else if(propertyStr.EndsWith("FLOAT"))
-			{
-				try
-				{
-					FloatPropertyRange range = curDevice.GetFloatPropertyRange(curProperty);
-					((Text)setText.placeholder).text = string.Format("[{0}-{1}]", range.min, range.max);
-				}
-				catch(NativeException e)
-				{
-					Debug.Log(e.Message);
-					PrintLog(e.Message);
-				}
-			}
-		}
-		else
-		{
-			if(propertyStr.EndsWith("BOOL"))
-			{
-				try
-				{
-					BoolPropertyRange range = curSensor.GetBoolPropertyRange(curProperty);
-					((Text)setText.placeholder).text = string.Format("[{0}-{1}]", range.min ? 1 : 0, range.max ? 1 : 0);
-				}
-				catch(NativeException e)
-				{
-					Debug.Log(e.Message);
-					PrintLog(e.Message);
-				}
-			}
-			else if(propertyStr.EndsWith("INT"))
-			{
-				try
-				{
-					IntPropertyRange range = curSensor.GetIntPropertyRange(curProperty);
-					((Text)setText.placeholder).text = string.Format("[{0}-{1}]", range.min, range.max);
-				}
-				catch(NativeException e)
-				{
-					Debug.Log(e.Message);
-					PrintLog(e.Message);
-				}
-			}
-			else if(propertyStr.EndsWith("FLOAT"))
-			{
-				try
-				{
-					FloatPropertyRange range = curSensor.GetFloatPropertyRange(curProperty);
-					((Text)setText.placeholder).text = string.Format("[{0}-{1}]", range.min, range.max);
-				}
-				catch(NativeException e)
-				{
-					Debug.Log(e.Message);
-					PrintLog(e.Message);
-				}
-			}
-		}
-	}
-
-	private void UpdateUI()
-	{
-		List<string> deviceNames = new List<string>();
-		foreach (var device in devices)
-		{
-			deviceNames.Add(device.GetDeviceInfo().Name());
-		}
-		deviceSelector.ClearOptions();
-		deviceSelector.AddOptions(deviceNames);
-
-		List<string> sensorNames = new List<string>(){"OB_DEVICE"};
-		foreach (var sensor in sensors)
-		{
-			sensorNames.Add(sensor.GetSensorType().ToString());
-		}
-		sensorSelector.ClearOptions();
-		sensorSelector.AddOptions(sensorNames);
-
-		List<string> propertyNames = new List<string>();
-		foreach (var property in propertyIds)
-		{
-			propertyNames.Add(property.ToString());
-		}
-		propertySelector.ClearOptions();
-		propertySelector.AddOptions(propertyNames);
-	}
-
-	private void UpdateSensors(int index)
-	{
-		sensorList = devices[index].GetSensorList();
-		for(uint i = 0; i < sensorList.SensorCount(); i++)
-		{
-			Sensor sensor = sensorList.GetSensor(i);
-			sensors.Add(sensor);
-			curSensor = sensors[0];
-		}
-	}
-
-	private void UpdateProperties(int index)
-	{
-		propertyIds.Clear();
-		if(index == 0)
-		{
-			for(int id = 0; id <= 85; id++)
-			{
-				PropertyId propertyId = (PropertyId)id;
-				if(curDevice.IsPropertySupported(propertyId))
-				{
-					propertyIds.Add(propertyId);
-				}
-			}
-			for(int id = 3000; id <= 3006; id++)
-			{
-				PropertyId propertyId = (PropertyId)id;
-				if(curDevice.IsPropertySupported(propertyId))
-				{
-					propertyIds.Add(propertyId);
-				}
-			}
-		}
-		else
-		{
-			for(int id = 2000; id <= 2024; id++)
-			{
-				PropertyId propertyId = (PropertyId)id;
-				if(curSensor.IsPropertySupported(propertyId))
-				{
-					propertyIds.Add(propertyId);
-				}
-			}
-		}
-	}
-
-	private void ReleaseDevices()
-	{
-		for(int i = 0; i < devices.Count; i++)
-		{
-			if(devices[i] != null)
-			{
-				devices[i].Dispose();
-				devices[i] = null;
-			}
-		}
-		devices.Clear();
-		deviceList.Dispose();
-	}
-
-	private void ReleaseSensors()
-	{
-		for(int i = 0; i < sensors.Count; i++)
-		{
-			if(sensors[i] != null)
-			{
-				sensors[i].Dispose();
-				sensors[i] = null;
-			}
-		}
-		sensors.Clear();
-		sensorList.Dispose();
 	}
 
 	private void PrintLog(string msg)
