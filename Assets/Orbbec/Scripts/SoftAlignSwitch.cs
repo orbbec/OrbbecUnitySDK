@@ -31,13 +31,6 @@ public class SoftAlignSwitch : MonoBehaviour
         if (pipelineManager.HasInit())
         {
             device = pipelineManager.GetDevice();
-            alignToggle.onValueChanged.AddListener((value) =>
-            {
-                if(device.IsPropertySupported(PropertyId.OB_DEVICE_PROPERTY_DEPTH_ALIGN_SOFTWARE_BOOL))
-				{
-					device.SetBoolProperty(PropertyId.OB_DEVICE_PROPERTY_DEPTH_ALIGN_SOFTWARE_BOOL, value);
-				}
-            });
             if(device.IsPropertySupported(PropertyId.OB_DEVICE_PROPERTY_DEPTH_ALIGN_SOFTWARE_BOOL))
 			{
 				bool align = device.GetBoolProperty(PropertyId.OB_DEVICE_PROPERTY_DEPTH_ALIGN_SOFTWARE_BOOL);
@@ -48,6 +41,15 @@ public class SoftAlignSwitch : MonoBehaviour
 				alignToggle.isOn = false;
 				alignToggle.interactable = false;
 			}
+            alignToggle.onValueChanged.AddListener((value) =>
+            {
+                if(device.IsPropertySupported(PropertyId.OB_DEVICE_PROPERTY_DEPTH_ALIGN_SOFTWARE_BOOL))
+				{
+                    pipelineManager.StopDefaultStreams();
+					device.SetBoolProperty(PropertyId.OB_DEVICE_PROPERTY_DEPTH_ALIGN_SOFTWARE_BOOL, value);
+                    pipelineManager.StartDefaultStreams();
+                }
+            });
         }
     }
 

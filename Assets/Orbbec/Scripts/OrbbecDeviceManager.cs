@@ -32,8 +32,8 @@ public class OrbbecDeviceManager : MonoBehaviour, OrbbecManager
 
     private Context context;
     private DeviceList deviceList;
-    private List<Device> devices;
-    private Device currentDevice;
+    // private List<Device> devices;
+    private Device device;
     private Sensor colorSensor;
     private Sensor depthSensor;
     private Sensor irSensor;
@@ -66,36 +66,42 @@ public class OrbbecDeviceManager : MonoBehaviour, OrbbecManager
                                     Version.GetMajorVersion(),
                                     Version.GetMinorVersion(),
                                     Version.GetPatchVersion()));
-        devices = new List<Device>();
         context = new Context();
-        context.SetDeviceChangedCallback(OnDeviceChanged);
 #if !UNITY_EDITOR && UNITY_ANDROID
         AndroidDeviceManager.Init();
-#else
-        deviceList = context.QueryDeviceList();
-        if (deviceList.DeviceCount() > 0)
-        {
-            for(uint i = 0; i < deviceList.DeviceCount(); i++)
-            {
-                Device device = deviceList.GetDevice(i);
-                devices.Add(device);
-            }
-            OpenDevice(0);
-            hasInit = true;
-            if(initHandle != null)
-            {
-                initHandle.Invoke();
-            }
-        }
 #endif
+        StartCoroutine(WaitForDevice());
     }
 
-    private void OpenDevice(int index)
+    private IEnumerator WaitForDevice()
     {
-        currentDevice = devices[index];
-        colorSensor = currentDevice.GetSensor(SensorType.OB_SENSOR_COLOR);
-        depthSensor = currentDevice.GetSensor(SensorType.OB_SENSOR_DEPTH);
-        irSensor = currentDevice.GetSensor(SensorType.OB_SENSOR_IR);
+        while(true)
+        {
+            yield return new WaitForEndOfFrame();
+            deviceList = context.QueryDeviceList();
+            if (deviceList.DeviceCount() > 0)
+            {
+                device = deviceList.GetDevice(0);
+                OpenDevice();
+                hasInit = true;
+                if(initHandle != null)
+                {
+                    initHandle.Invoke();
+                }
+                break;
+            }
+            else
+            {
+                deviceList.Dispose();
+            }
+        }
+    }
+
+    private void OpenDevice()
+    {
+        colorSensor = device.GetSensor(SensorType.OB_SENSOR_COLOR);
+        depthSensor = device.GetSensor(SensorType.OB_SENSOR_DEPTH);
+        irSensor = device.GetSensor(SensorType.OB_SENSOR_IR);
         colorProfiles = colorSensor.GetStreamProfiles();
         depthProfiles = depthSensor.GetStreamProfiles();
         irProfiles = irSensor.GetStreamProfiles();
@@ -189,7 +195,15 @@ public class OrbbecDeviceManager : MonoBehaviour, OrbbecManager
         Debug.Log("device has opened");
     }
 
-    private void CloseDevice()
+    void OnDestroy()
+    {
+        if (hasInit)
+        {
+            ReleaseSDK();
+        }
+    }
+
+    private void ReleaseSDK()
     {
         if (colorSensor != null)
         {
@@ -224,74 +238,9 @@ public class OrbbecDeviceManager : MonoBehaviour, OrbbecManager
                 profile.Dispose();
             }
         }
-        if(currentDevice != null)
+        if(device != null)
         {
-            currentDevice.Dispose();
-        }
-        Debug.Log("device has closed");
-    }
-
-    private void OnDeviceChanged(DeviceList removed, DeviceList added)
-    {
-        Debug.Log(string.Format("on device changed: removed count {0}, added count {1}", removed.DeviceCount(), added.DeviceCount()));
-        for(uint i = 0; i < added.DeviceCount(); i++)
-        {
-            Device device = added.GetDevice(i);
-            devices.Add(device);
-            Debug.Log(string.Format("added device: {0} {1} {2} {3}", added.Name(i), added.Vid(i), added.Pid(i), added.Uid(i)));
-        }
-        for(uint i = 0; i < removed.DeviceCount(); i++)
-        {
-            Debug.Log(string.Format("removed device: {0} {1} {2} {3}", removed.Name(i), removed.Vid(i), removed.Pid(i), removed.Uid(i)));
-            if(removed.Uid(i) == currentDevice.GetDeviceInfo().Uid())
-            {
-                CloseDevice();
-                devices.Remove(currentDevice);
-                hasInit = false;
-            }
-            else
-            {
-                for(int j = devices.Count - 1; j >= 0; j--)
-                {
-                    if(removed.Uid(i) == devices[j].GetDeviceInfo().Uid())
-                    {
-                        devices.RemoveAt(j);
-                    }
-                }
-            }
-        }
-
-        if(!hasInit)
-        {
-            OpenDevice(0);
-            hasInit = true;
-            if(initHandle != null)
-            {
-                initHandle.Invoke();
-            }
-        }
-        
-        removed.Dispose();
-        added.Dispose();
-    }
-
-    void OnDestroy()
-    {
-        if (hasInit)
-        {
-            ReleaseSDK();
-        }
-    }
-
-    private void ReleaseSDK()
-    {
-        CloseDevice();
-        foreach(var device in devices)
-        {
-            if (device != null)
-            {
-                device.Dispose();
-            }
+            device.Dispose();
         }
         if (deviceList != null)
         {
@@ -502,40 +451,9 @@ public class OrbbecDeviceManager : MonoBehaviour, OrbbecManager
         return null;
     }
 
-    public Device GetCurrentDevice()
+    public Device GetDevice()
     {
-        return currentDevice;
-    }
-
-    public Device GetDevice(int index)
-    {
-        return devices[index];
-    }
-
-    public int GetDeviceCount()
-    {
-        return (int)deviceList.DeviceCount();
-    }
-
-    public void ChangeDevice(int index)
-    {
-        CloseDevice();
-        OpenDevice(index);
-    }
-
-    public Sensor GetSensor(SensorType sensorType)
-    {
-        switch (sensorType)
-        {
-            case SensorType.OB_SENSOR_COLOR:
-                return colorSensor;
-            case SensorType.OB_SENSOR_DEPTH:
-                return depthSensor;
-            case SensorType.OB_SENSOR_IR:
-                return irSensor;
-        }
-        Debug.Log(string.Format("no sensor type: {0} found", sensorType));
-        return null;
+        return device;
     }
 
     public void SetInitHandle(OrbbecInitHandle handle)

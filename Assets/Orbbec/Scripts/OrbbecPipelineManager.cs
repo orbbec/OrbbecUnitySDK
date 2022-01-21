@@ -50,22 +50,31 @@ public class OrbbecPipelineManager : MonoBehaviour, OrbbecManager
         context = new Context();
 #if !UNITY_EDITOR && UNITY_ANDROID
         AndroidDeviceManager.Init();
-        context.SetDeviceChangedCallback(OnDeviceChanged);
 #endif
-        deviceList = context.QueryDeviceList();
-        if (deviceList.DeviceCount() > 0)
+        StartCoroutine(WaitForDevice());
+    }
+
+    private IEnumerator WaitForDevice()
+    {
+        while(true)
         {
-            device = deviceList.GetDevice(0);
-            StartPipeline();
-            hasInit = true;
-            if(initHandle != null)
+            yield return new WaitForEndOfFrame();
+            deviceList = context.QueryDeviceList();
+            if (deviceList.DeviceCount() > 0)
             {
-                initHandle.Invoke();
+                device = deviceList.GetDevice(0);
+                StartPipeline();
+                hasInit = true;
+                if(initHandle != null)
+                {
+                    initHandle.Invoke();
+                }
+                break;
             }
-        }
-        else
-        {
-            context.SetDeviceChangedCallback(OnDeviceChanged);
+            else
+            {
+                deviceList.Dispose();
+            }
         }
     }
 
@@ -171,23 +180,6 @@ public class OrbbecPipelineManager : MonoBehaviour, OrbbecManager
             pipeline.Start(config, OnFrameset);
             Debug.Log("pipeline has started");
         }
-    }
-
-    private void OnDeviceChanged(DeviceList removed, DeviceList added)
-    {
-        Debug.Log(string.Format("on device changed: removed count {0}, added count {1}", removed.DeviceCount(), added.DeviceCount()));
-        if (device == null && added.DeviceCount() > 0)
-        {
-            device = added.GetDevice(0);
-            StartPipeline();
-            hasInit = true;
-            if(initHandle != null)
-            {
-                initHandle.Invoke();
-            }
-        }
-        removed.Dispose();
-        added.Dispose();
     }
 
     void OnDestroy()

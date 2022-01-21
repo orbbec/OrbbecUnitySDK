@@ -49,49 +49,36 @@ public class SensorControl : MonoBehaviour {
 		sensors = new List<Sensor>();
 		propertyIds = new List<PropertyId>();
         context = new Context();
-        context.SetDeviceChangedCallback(OnDeviceChanged);
+        // context.SetDeviceChangedCallback(OnDeviceChanged);
 #if !UNITY_EDITOR && UNITY_ANDROID
         AndroidDeviceManager.Init();
-#else
-        deviceList = context.QueryDeviceList();
-        if (deviceList.DeviceCount() > 0)
-        {
-            for(uint i = 0; i < deviceList.DeviceCount(); i++)
-            {
-                Device device = deviceList.GetDevice(i);
-                devices.Add(device);
-            }
-            hasInit = true;
-			OnDeviceInit();
-        }
 #endif
+		StartCoroutine(WaitForDevice());
     }
 
-	private void OnDeviceChanged(DeviceList removed, DeviceList added)
+	private IEnumerator WaitForDevice()
     {
-        Debug.Log(string.Format("on device changed: removed count {0}, added count {1}", removed.DeviceCount(), added.DeviceCount()));
-        if(added.DeviceCount() > 0)
-		{
-			for(uint i = 0; i < added.DeviceCount(); i++)
-			{
-				Device device = added.GetDevice(i);
-				devices.Add(device);
-				Debug.Log(string.Format("added device: {0} {1} {2} {3}", added.Name(i), added.Vid(i), added.Pid(i), added.Uid(i)));
-			}
-
-			if(!hasInit)
-			{
+        while(true)
+        {
+            yield return new WaitForEndOfFrame();
+            deviceList = context.QueryDeviceList();
+            if (deviceList.DeviceCount() > 0)
+            {
+				yield return new WaitForEndOfFrame();
+                for(uint i = 0; i < deviceList.DeviceCount(); i++)
+				{
+					Device device = deviceList.GetDevice(i);
+					devices.Add(device);
+				}
 				hasInit = true;
 				OnDeviceInit();
-			}
-			else
-			{
-				OnDeviceAdd();
-			}
-		}
-
-        removed.Dispose();
-        added.Dispose();
+                break;
+            }
+            else
+            {
+                deviceList.Dispose();
+            }
+        }
     }
 
 	private void OnDeviceInit()
@@ -270,7 +257,7 @@ public class SensorControl : MonoBehaviour {
 					bool value = curDevice.GetBoolProperty(curProperty);
 					getText.text = (value ? 1 : 0).ToString();
 					BoolPropertyRange range = curDevice.GetBoolPropertyRange(curProperty);
-					((Text)setText.placeholder).text = string.Format("[0-1]");
+					((Text)setText.placeholder).text = string.Format("[{0}-{1}]", range.min ? 1 : 0, range.max ? 1 : 0);
 				}
 				catch(NativeException e)
 				{
@@ -318,7 +305,7 @@ public class SensorControl : MonoBehaviour {
 					bool value = curSensor.GetBoolProperty(curProperty);
 					getText.text = (value ? 1 : 0).ToString();
 					BoolPropertyRange range = curSensor.GetBoolPropertyRange(curProperty);
-					((Text)setText.placeholder).text = string.Format("[0-1]");
+					((Text)setText.placeholder).text = string.Format("[{0}-{1}]", range.min ? 1 : 0, range.max ? 1 : 0);
 				}
 				catch(NativeException e)
 				{

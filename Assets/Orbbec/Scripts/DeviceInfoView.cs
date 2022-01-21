@@ -35,7 +35,7 @@ public class DeviceInfoView : MonoBehaviour
                                     Version.GetMinorVersion(),
                                     Version.GetPatchVersion()));
 
-            Device device = deviceManager.GetDevice(0);
+            Device device = deviceManager.GetDevice();
             DeviceInfo devInfo = device.GetDeviceInfo();
             sb.AppendLine(string.Format("Device name: {0}", devInfo.Name()));
             sb.AppendLine(string.Format("Device pid: {0}", devInfo.Pid()));

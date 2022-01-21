@@ -31,15 +31,6 @@ public class HardAlignSwitch : MonoBehaviour
         if (pipelineManager.HasInit())
         {
             device = pipelineManager.GetDevice();
-            alignToggle.onValueChanged.AddListener((value) =>
-            {
-                if (device.IsPropertySupported(PropertyId.OB_DEVICE_PROPERTY_DEPTH_ALIGN_HARDWARE_BOOL))
-                {
-					pipelineManager.StopDefaultStreams();
-                    device.SetBoolProperty(PropertyId.OB_DEVICE_PROPERTY_DEPTH_ALIGN_HARDWARE_BOOL, value);
-					pipelineManager.StartDefaultStreams();
-                }
-            });
             if (device.IsPropertySupported(PropertyId.OB_DEVICE_PROPERTY_DEPTH_ALIGN_HARDWARE_BOOL))
             {
                 bool align = device.GetBoolProperty(PropertyId.OB_DEVICE_PROPERTY_DEPTH_ALIGN_HARDWARE_BOOL);
@@ -50,6 +41,15 @@ public class HardAlignSwitch : MonoBehaviour
 				alignToggle.isOn = false;
 				alignToggle.interactable = false;
 			}
+            alignToggle.onValueChanged.AddListener((value) =>
+            {
+                if (device.IsPropertySupported(PropertyId.OB_DEVICE_PROPERTY_DEPTH_ALIGN_HARDWARE_BOOL))
+                {
+					pipelineManager.StopDefaultStreams();
+                    device.SetBoolProperty(PropertyId.OB_DEVICE_PROPERTY_DEPTH_ALIGN_HARDWARE_BOOL, value);
+					pipelineManager.StartDefaultStreams();
+                }
+            });
         }
     }
 
