@@ -12,3 +12,4 @@
 *.bak.meta
 .vscode/
 Log/
+Build/
