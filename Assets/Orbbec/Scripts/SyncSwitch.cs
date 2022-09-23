@@ -5,6 +5,8 @@ using Orbbec;
 using UnityEngine;
 using UnityEngine.UI;
 
+namespace OrbbecUnity
+{
 public class SyncSwitch : MonoBehaviour
 {
 
@@ -39,4 +41,5 @@ public class SyncSwitch : MonoBehaviour
 			}
         });
     }
+}
 }

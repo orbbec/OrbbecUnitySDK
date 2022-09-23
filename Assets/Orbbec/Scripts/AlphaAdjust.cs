@@ -3,6 +3,8 @@ using System.Collections.Generic;
 using UnityEngine;
 using UnityEngine.UI;
 
+namespace OrbbecUnity
+{
 public class AlphaAdjust : MonoBehaviour {
 
 	public Slider alphaSlider;
@@ -20,4 +22,5 @@ public class AlphaAdjust : MonoBehaviour {
 	void Update () {
 		
 	}
+}
 }

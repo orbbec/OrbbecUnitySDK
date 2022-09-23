@@ -1,23 +1,42 @@
 ﻿using System.Collections;
 using System.Collections.Generic;
 using Orbbec;
+using OrbbecUnity;
 using UnityEngine;
 using UnityEngine.UI;
 
 public class ColorImageView : MonoBehaviour
 {
-    public OrbbecManager orbbecManager;
-    public Texture2D colorTexture;
+    private OrbbecPipeline pipeline;
+    private Texture2D colorTexture;
+    private int colorWidth;
+    private int colorHeight;
+    private byte[] colorData;
     
     // Start is called before the first frame update
     void Start()
     {
-        orbbecManager = FindObjectOfType<OrbbecDeviceManager>();
-        if(orbbecManager == null)
-        {
-            orbbecManager = FindObjectOfType<OrbbecPipelineManager>();
-        }
-        colorTexture = new Texture2D(0, 0, TextureFormat.RGB24, false);
+        pipeline = OrbbecPipeline.Instance;
+        pipeline.onPipelineInit.AddListener(()=>{
+            pipeline.StartPipeline((frameset)=>{
+                var colorFrame = frameset.GetColorFrame();
+                if(colorFrame != null)
+                {
+                    colorWidth = (int)colorFrame.GetWidth();
+                    colorHeight = (int)colorFrame.GetHeight();
+                    var dataSize = colorFrame.GetDataSize();
+                    if(colorData == null || colorData.Length != dataSize)
+                    {
+                        colorData = new byte[dataSize];
+                    }
+                    colorFrame.CopyData(ref colorData);
+                    colorFrame.Dispose();
+                }
+                frameset.Dispose();
+            });
+        });
+        
+        colorTexture = new Texture2D(2, 2, TextureFormat.RGB24, false);
         // GetComponent<RawImage>().texture = colorTexture;
         GetComponent<Renderer>().material.mainTexture = colorTexture;
     }
@@ -25,15 +44,15 @@ public class ColorImageView : MonoBehaviour
     // Update is called once per frame
     void Update()
     {
-        StreamData imageData = orbbecManager.GetStreamData(StreamType.OB_STREAM_COLOR);
-        if(imageData == null)
+        if(colorWidth == 0 || colorHeight == 0 || colorData == null || colorData.Length == 0)
         {
             return;
         }
-        if (imageData.format == Format.OB_FORMAT_MJPG)
+        if(colorTexture.width != colorWidth || colorTexture.height != colorHeight)
         {
-            colorTexture.LoadImage(imageData.data);
-            colorTexture.Apply();
+            colorTexture.Resize(colorWidth, colorHeight);
         }
+        colorTexture.LoadRawTextureData(colorData);
+        colorTexture.Apply();
     }
 }

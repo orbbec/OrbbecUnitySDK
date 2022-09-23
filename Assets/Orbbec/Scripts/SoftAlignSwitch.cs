@@ -5,6 +5,8 @@ using Orbbec;
 using UnityEngine;
 using UnityEngine.UI;
 
+namespace OrbbecUnity
+{
 public class SoftAlignSwitch : MonoBehaviour
 {
 
@@ -45,9 +47,9 @@ public class SoftAlignSwitch : MonoBehaviour
             {
                 if(device.IsPropertySupported(PropertyId.OB_DEVICE_PROPERTY_DEPTH_ALIGN_SOFTWARE_BOOL))
 				{
-                    pipelineManager.StopDefaultStreams();
+                    pipelineManager.StopPipeline();
 					device.SetBoolProperty(PropertyId.OB_DEVICE_PROPERTY_DEPTH_ALIGN_SOFTWARE_BOOL, value);
-                    pipelineManager.StartDefaultStreams();
+                    pipelineManager.StartPipeline();
                 }
             });
         }
@@ -58,4 +60,5 @@ public class SoftAlignSwitch : MonoBehaviour
     {
 
     }
+}
 }

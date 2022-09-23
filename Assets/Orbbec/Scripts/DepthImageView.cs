@@ -1,23 +1,41 @@
 ﻿using System.Collections;
 using System.Collections.Generic;
 using Orbbec;
+using OrbbecUnity;
 using UnityEngine;
 using UnityEngine.UI;
 
 public class DepthImageView : MonoBehaviour
 {
-    public OrbbecManager orbbecManager;
-    public Texture2D depthTexture;
+    private OrbbecPipeline pipeline;
+    private Texture2D depthTexture;
+    private int depthWidth;
+    private int depthHeight;
+    private byte[] depthData;
     
     // Start is called before the first frame update
     void Start()
     {
-        orbbecManager = FindObjectOfType<OrbbecDeviceManager>();
-        if(orbbecManager == null)
-        {
-            orbbecManager = FindObjectOfType<OrbbecPipelineManager>();
-        }
-        depthTexture = new Texture2D(0, 0, TextureFormat.RG16, false);
+        pipeline = OrbbecPipeline.Instance;
+        pipeline.onPipelineInit.AddListener(()=>{
+            pipeline.StartPipeline((frameset)=>{
+                var depthFrame = frameset.GetDepthFrame();
+                if(depthFrame != null)
+                {
+                    depthWidth = (int)depthFrame.GetWidth();
+                    depthHeight = (int)depthFrame.GetHeight();
+                    var dataSize = depthFrame.GetDataSize();
+                    if(depthData == null || depthData.Length != dataSize)
+                    {
+                        depthData = new byte[dataSize];
+                    }
+                    depthFrame.CopyData(ref depthData);
+                    depthFrame.Dispose();
+                }
+                frameset.Dispose();
+            });
+        });
+        depthTexture = new Texture2D(2, 2, TextureFormat.RG16, false);
         // GetComponent<RawImage>().texture = depthTexture;
         GetComponent<Renderer>().material.mainTexture = depthTexture;
     }
@@ -25,19 +43,15 @@ public class DepthImageView : MonoBehaviour
     // Update is called once per frame
     void Update()
     {
-        StreamData imageData = orbbecManager.GetStreamData(StreamType.OB_STREAM_DEPTH);
-        if(imageData == null)
+        if(depthWidth == 0 || depthHeight == 0 || depthData == null || depthData.Length == 0)
         {
             return;
         }
-        if (imageData.format == Format.OB_FORMAT_Y16)
+        if(depthTexture.width != depthWidth || depthTexture.height != depthHeight)
         {
-            if(depthTexture.width != imageData.width || depthTexture.height != imageData.height)
-            {
-                depthTexture.Resize(imageData.width, imageData.height);
-            }
-            depthTexture.LoadRawTextureData(imageData.data);
-            depthTexture.Apply();
+            depthTexture.Resize(depthWidth, depthHeight);
         }
+        depthTexture.LoadRawTextureData(depthData);
+        depthTexture.Apply();
     }
 }

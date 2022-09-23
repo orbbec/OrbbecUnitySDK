@@ -1,6 +1,8 @@
 /Temp
 /Library
 /obj
+/Logs
+/Packages
 *.sln
 *.csproj
 *_Data/

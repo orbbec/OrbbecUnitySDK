@@ -4,6 +4,8 @@ using UnityEngine;
 using UnityEngine.UI;
 using UnityEngine.SceneManagement;
 
+namespace OrbbecUnity
+{
 public class EnterScene : MonoBehaviour {
 
 	public string sceneName;
@@ -19,4 +21,5 @@ public class EnterScene : MonoBehaviour {
 	void Update () {
 		
 	}
+}
 }

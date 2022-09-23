@@ -5,6 +5,8 @@ using Orbbec;
 using UnityEngine;
 using UnityEngine.UI;
 
+namespace OrbbecUnity
+{
 public class SyncAlignController : MonoBehaviour
 {
 	public Toggle syncToggle;
@@ -45,45 +47,54 @@ public class SyncAlignController : MonoBehaviour
 				}
 			});
 			
-            if (device.IsPropertySupported(PropertyId.OB_DEVICE_PROPERTY_DEPTH_ALIGN_HARDWARE_BOOL))
-            {
-                bool align = device.GetBoolProperty(PropertyId.OB_DEVICE_PROPERTY_DEPTH_ALIGN_HARDWARE_BOOL);
-                hardAlignToggle.isOn = align;
-            }
-			else
-			{
-				hardAlignToggle.isOn = false;
-				hardAlignToggle.interactable = false;
-			}
+            // if (device.IsPropertySupported(PropertyId.OB_DEVICE_PROPERTY_DEPTH_ALIGN_HARDWARE_BOOL))
+            // {
+            //     bool align = device.GetBoolProperty(PropertyId.OB_DEVICE_PROPERTY_DEPTH_ALIGN_HARDWARE_BOOL);
+            //     hardAlignToggle.isOn = align;
+            // }
+			// else
+			// {
+			// 	hardAlignToggle.isOn = false;
+			// 	hardAlignToggle.interactable = false;
+			// }
             hardAlignToggle.onValueChanged.AddListener((value) =>
             {
-                if (device.IsPropertySupported(PropertyId.OB_DEVICE_PROPERTY_DEPTH_ALIGN_HARDWARE_BOOL))
+				Config config = pipelineManager.GetConfig();
+                if (value)
                 {
-					pipelineManager.StopDefaultStreams();
-                    device.SetBoolProperty(PropertyId.OB_DEVICE_PROPERTY_DEPTH_ALIGN_HARDWARE_BOOL, value);
-					pipelineManager.StartDefaultStreams();
+					config.SetAlignMode(AlignMode.ALIGN_D2C_HW_MODE);
                 }
+				else
+				{
+					config.SetAlignMode(AlignMode.ALIGN_DISABLE);
+				}
+				pipelineManager.SwitchConfig(config);
             });
 
-			if(device.IsPropertySupported(PropertyId.OB_DEVICE_PROPERTY_DEPTH_ALIGN_SOFTWARE_BOOL))
-			{
-				bool align = device.GetBoolProperty(PropertyId.OB_DEVICE_PROPERTY_DEPTH_ALIGN_SOFTWARE_BOOL);
-                softAlignToggle.isOn = align;
-			}
-			else
-			{
-				softAlignToggle.isOn = false;
-				softAlignToggle.interactable = false;
-			}
+			// if(device.IsPropertySupported(PropertyId.OB_DEVICE_PROPERTY_DEPTH_ALIGN_SOFTWARE_BOOL))
+			// {
+			// 	bool align = device.GetBoolProperty(PropertyId.OB_DEVICE_PROPERTY_DEPTH_ALIGN_SOFTWARE_BOOL);
+            //     softAlignToggle.isOn = align;
+			// }
+			// else
+			// {
+			// 	softAlignToggle.isOn = false;
+			// 	softAlignToggle.interactable = false;
+			// }
             softAlignToggle.onValueChanged.AddListener((value) =>
             {
-                if(device.IsPropertySupported(PropertyId.OB_DEVICE_PROPERTY_DEPTH_ALIGN_SOFTWARE_BOOL))
-				{
-                    pipelineManager.StopDefaultStreams();
-					device.SetBoolProperty(PropertyId.OB_DEVICE_PROPERTY_DEPTH_ALIGN_SOFTWARE_BOOL, value);
-                    pipelineManager.StartDefaultStreams();
+                Config config = pipelineManager.GetConfig();
+                if (value)
+                {
+					config.SetAlignMode(AlignMode.ALIGN_D2C_SW_MODE);
                 }
+				else
+				{
+					config.SetAlignMode(AlignMode.ALIGN_DISABLE);
+				}
+				pipelineManager.SwitchConfig(config);
             });
         }
     }
+}
 }

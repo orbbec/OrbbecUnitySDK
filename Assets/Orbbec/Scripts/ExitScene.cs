@@ -3,6 +3,8 @@ using System.Collections.Generic;
 using UnityEngine;
 using UnityEngine.SceneManagement;
 
+namespace OrbbecUnity
+{
 public class ExitScene : MonoBehaviour {
 
 	private bool isLoading = false;
@@ -23,4 +25,5 @@ public class ExitScene : MonoBehaviour {
 			}
 		}
 	}
+}
 }

@@ -1,6 +1,8 @@
 
 using UnityEngine;
 
+namespace OrbbecUnity
+{
 public class AndroidDeviceManager
 {
     private static AndroidJavaClass UsbPermissionUtil;
@@ -21,4 +23,5 @@ public class AndroidDeviceManager
         Debug.Log("close android device");
         UsbPermissionUtil.CallStatic("closeUsbDevice");
     }
+}
 }
