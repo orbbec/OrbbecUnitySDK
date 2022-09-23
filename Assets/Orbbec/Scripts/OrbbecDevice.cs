@@ -14,7 +14,6 @@ namespace OrbbecUnity
         public DeviceFoundEvent onDeviceFound;
 
         private Context context;
-        private DeviceList deviceList;
         private Device device;
 
         public Device Device
@@ -34,12 +33,20 @@ namespace OrbbecUnity
             }
         }
 
+        void OnDestroy()
+        {
+            if(device != null)
+            {
+                device.Dispose();
+            }
+        }
+
         private IEnumerator WaitForDevice()
         {
             while (true)
             {
                 yield return new WaitForEndOfFrame();
-                deviceList = context.QueryDeviceList();
+                DeviceList deviceList = context.QueryDeviceList();
                 if (deviceList.DeviceCount() > deviceIndex)
                 {
                     device = deviceList.GetDevice((uint)deviceIndex);
@@ -50,6 +57,7 @@ namespace OrbbecUnity
                         deviceInfo.SerialNumber(),
                         deviceInfo.Vid(),
                         deviceInfo.Pid()));
+                    deviceList.Dispose();
                     onDeviceFound.Invoke(device);
                     break;
                 }

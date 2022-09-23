@@ -4,10 +4,31 @@ using UnityEngine;
 
 namespace OrbbecUnity
 {
-    public class OrbbecContext : Singleton<OrbbecContext>
+    public class OrbbecContext : MonoBehaviour
     {
+        private static OrbbecContext instance;
         private bool hasInit;
         private Context context;
+
+        public static OrbbecContext Instance
+        {
+            get
+            {
+                if(instance == null)
+                {
+                    instance = FindObjectOfType<OrbbecContext>();
+ 
+                    if (instance == null)
+                    {
+                        var singletonObject = new GameObject();
+                        instance = singletonObject.AddComponent<OrbbecContext>();
+                        singletonObject.name = typeof(OrbbecContext).ToString();
+                    }
+                }
+
+                return instance;
+            }
+        }
 
         public bool HasInit
         {
@@ -31,6 +52,15 @@ namespace OrbbecUnity
             {
                 InitSDK();
             }
+        }
+
+        void OnDestroy()
+        {
+            if(hasInit)
+            {
+                context.Dispose();
+            }
+            hasInit = false;
         }
 
         private void InitSDK()

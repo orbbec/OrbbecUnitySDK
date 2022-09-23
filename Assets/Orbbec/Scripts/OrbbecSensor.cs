@@ -6,10 +6,9 @@ namespace OrbbecUnity
 {
     public class OrbbecSensor : MonoBehaviour
     {
+        public OrbbecDevice orbbecDevice;
         public OrbbecProfile orbbecProfile;
 
-        private Device device;
-        private SensorList deviceList;
         private Sensor sensor;
         private StreamProfile streamProfile;
 
@@ -18,6 +17,19 @@ namespace OrbbecUnity
             get
             {
                 return sensor;
+            }
+        }
+
+        void Start()
+        {
+            orbbecDevice.onDeviceFound.AddListener(InitSensor);
+        }
+
+        void OnDestroy()
+        {
+            if(sensor != null)
+            {
+                sensor.Dispose();
             }
         }
 
@@ -67,25 +79,7 @@ namespace OrbbecUnity
             sensor.Stop();
         }
 
-        void OnEnable()
-        {
-            var orbbecDevice = GetComponentInParent<OrbbecDevice>();
-            if(orbbecDevice != null)
-            {
-                orbbecDevice.onDeviceFound.AddListener(OnDeviceFound);;
-            }
-        }
-
-        void OnDisable()
-        {
-            var orbbecDevice = GetComponentInParent<OrbbecDevice>();
-            if(orbbecDevice != null)
-            {
-                orbbecDevice.onDeviceFound.RemoveListener(OnDeviceFound);;
-            }
-        }
-
-        private void OnDeviceFound(Device device)
+        private void InitSensor(Device device)
         {
             sensor = device.GetSensor(orbbecProfile.sensorType);
             Debug.Log("Sensor found: " + orbbecProfile.sensorType);            

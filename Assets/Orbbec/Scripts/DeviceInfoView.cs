@@ -15,7 +15,6 @@ public class DeviceInfoView : MonoBehaviour
     void Start()
     {
         infoText = GetComponent<Text>();
-        orbbecDevice = FindObjectOfType<OrbbecDevice>();
         orbbecDevice.onDeviceFound.AddListener(OnDeviceFound);
     }
 

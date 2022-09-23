@@ -8,17 +8,23 @@ namespace OrbbecUnity
     [System.Serializable]
     public class PipelineInitEvent : UnityEvent {}
 
-    public class OrbbecPipeline : Singleton<OrbbecPipeline>
+    public class OrbbecPipeline : MonoBehaviour
     {
-        public int deviceIndex;
+        public OrbbecDevice orbbecDevice;
         public OrbbecConfig orbbecConfig;
         public PipelineInitEvent onPipelineInit;
 
-        private Context context;
-        private DeviceList deviceList;
-        private Device device;
+        private bool hasInit;
         private Pipeline pipeline;
         private Config config;
+
+        public bool HasInit
+        {
+            get
+            {
+                return hasInit;
+            }
+        }
 
         public Pipeline Pipeline
         {
@@ -30,44 +36,24 @@ namespace OrbbecUnity
 
         void Start()
         {
-            context = OrbbecContext.Instance.Context;
-            if(OrbbecContext.Instance.HasInit)
-            {
-                StartCoroutine(WaitForDevice());
-            }
+            orbbecDevice.onDeviceFound.AddListener(InitPipeline);
         }
 
-        private IEnumerator WaitForDevice()
+        void OnDestroy()
         {
-            while (true)
+            if(hasInit)
             {
-                yield return new WaitForEndOfFrame();
-                deviceList = context.QueryDeviceList();
-                if (deviceList.DeviceCount() > deviceIndex)
-                {
-                    device = deviceList.GetDevice((uint)deviceIndex);
-                    DeviceInfo deviceInfo = device.GetDeviceInfo();
-                    Debug.Log(string.Format(
-                        "Device found: {0} {1} {2:X} {3:X}", 
-                        deviceInfo.Name(), 
-                        deviceInfo.SerialNumber(),
-                        deviceInfo.Vid(),
-                        deviceInfo.Pid()));
-                    InitPipeline();
-                    onPipelineInit.Invoke();
-                    break;
-                }
-                else
-                {
-                    deviceList.Dispose();
-                }
+                config.Dispose();
+                pipeline.Dispose();
             }
         }
 
-        private void InitPipeline()
+        private void InitPipeline(Device device)
         {
             pipeline = new Pipeline(device);
             config = new Config();
+            hasInit = true;
+            onPipelineInit.Invoke();
         }
 
         private StreamProfile FindProfile(OrbbecProfile orbbecProfile)
