@@ -10,7 +10,7 @@ namespace OrbbecUnity
 public class SensorControl : MonoBehaviour {
 
 	public Dropdown deviceSelector;
-	public Dropdown sensorSelector;
+	// public Dropdown sensorSelector;
 	public Dropdown propertySelector;
 	public Button getButton;
 	public Button setButton;
@@ -88,11 +88,12 @@ public class SensorControl : MonoBehaviour {
 		curDevice = devices[0];
 		curSensor = null;
 		curProperty = (PropertyId)(-1);
-		UpdateSensors();
+		// UpdateSensors();
 		UpdateProperties();
 
 		InitUI();
 		UpdateDeviceSelector();
+		UpdatePropertySelector();
 	}
 
 	private void OnDeviceAdd()
@@ -100,35 +101,43 @@ public class SensorControl : MonoBehaviour {
 		UpdateDeviceSelector();
 	}
 
-	private void UpdateSensors()
-	{
-		sensors.Clear();
-		sensorList = curDevice.GetSensorList();
-		for(uint i = 0; i < sensorList.SensorCount(); i++)
-		{
-			Sensor sensor = sensorList.GetSensor(i);
-			sensors.Add(sensor);
-			curSensor = null;
-		}
-	}
+	// private void UpdateSensors()
+	// {
+	// 	sensors.Clear();
+	// 	sensorList = curDevice.GetSensorList();
+	// 	for(uint i = 0; i < sensorList.SensorCount(); i++)
+	// 	{
+	// 		Sensor sensor = sensorList.GetSensor(i);
+	// 		sensors.Add(sensor);
+	// 		curSensor = null;
+	// 	}
+	// }
 
 	private void UpdateProperties()
 	{
 		propertyIds.Clear();
 		if(curSensor == null)
 		{
-			for(int id = 0; id <= 85; id++)
+			for(int id = 0; id <= 98; id++)
 			{
 				PropertyId propertyId = (PropertyId)id;
-				if(curDevice.IsPropertySupported(propertyId))
+				if(curDevice.IsPropertySupported(propertyId, PermissionType.OB_PERMISSION_READ_WRITE))
 				{
 					propertyIds.Add(propertyId);
 				}
 			}
-			for(int id = 3000; id <= 3006; id++)
+			for(int id = 2000; id <= 2028; id++)
 			{
 				PropertyId propertyId = (PropertyId)id;
-				if(curDevice.IsPropertySupported(propertyId))
+				if(curDevice.IsPropertySupported(propertyId, PermissionType.OB_PERMISSION_READ_WRITE))
+				{
+					propertyIds.Add(propertyId);
+				}
+			}
+			for(int id = 3000; id <= 3008; id++)
+			{
+				PropertyId propertyId = (PropertyId)id;
+				if(curDevice.IsPropertySupported(propertyId, PermissionType.OB_PERMISSION_READ_WRITE))
 				{
 					propertyIds.Add(propertyId);
 				}
@@ -154,7 +163,7 @@ public class SensorControl : MonoBehaviour {
 	private void InitUI()
 	{
 		deviceSelector.onValueChanged.AddListener(OnDeviceSelect);
-		sensorSelector.onValueChanged.AddListener(OnSensorSelect);
+		// sensorSelector.onValueChanged.AddListener(OnSensorSelect);
 		propertySelector.onValueChanged.AddListener(OnPropertySelect);
 
 		getButton.onClick.AddListener(OnGetProperty);
@@ -164,30 +173,30 @@ public class SensorControl : MonoBehaviour {
 	private void OnDeviceSelect(int index)
 	{
 		curDevice = devices[index];
-		UpdateSensors();
+		// UpdateSensors();
 		UpdateProperties();
-		UpdateSensorSelector();
+		// UpdateSensorSelector();
 		Debug.Log("DeviceSelect: " + curDevice.GetDeviceInfo().Name());
 		PrintLog("DeviceSelect: " + curDevice.GetDeviceInfo().Name());
 	}
 
-	private void OnSensorSelect(int index)
-	{
-		if(index == 0)
-		{
-			curSensor = null;
-			Debug.Log("SensorSelect: " + "OB_DEVICE");
-			PrintLog("SensorSelect: " + "OB_DEVICE");
-		}
-		else
-		{
-			curSensor = sensors[index - 1];
-			Debug.Log("SensorSelect: " + curSensor.GetSensorType().ToString());
-			PrintLog("SensorSelect: " + curSensor.GetSensorType().ToString());
-		}
-		UpdateProperties();
-		UpdatePropertySelector();
-	}
+	// private void OnSensorSelect(int index)
+	// {
+	// 	if(index == 0)
+	// 	{
+	// 		curSensor = null;
+	// 		Debug.Log("SensorSelect: " + "OB_DEVICE");
+	// 		PrintLog("SensorSelect: " + "OB_DEVICE");
+	// 	}
+	// 	else
+	// 	{
+	// 		curSensor = sensors[index - 1];
+	// 		Debug.Log("SensorSelect: " + curSensor.GetSensorType().ToString());
+	// 		PrintLog("SensorSelect: " + curSensor.GetSensorType().ToString());
+	// 	}
+	// 	UpdateProperties();
+	// 	UpdatePropertySelector();
+	// }
 
 	private void OnPropertySelect(int index)
 	{
@@ -209,22 +218,22 @@ public class SensorControl : MonoBehaviour {
 		deviceSelector.AddOptions(deviceNames);
 		deviceSelector.value = 0;
 
-		UpdateSensorSelector();
+		// UpdateSensorSelector();
 	}
 
-	private void UpdateSensorSelector()
-	{
-		List<string> sensorNames = new List<string>(){"OB_DEVICE"};
-		foreach (var sensor in sensors)
-		{
-			sensorNames.Add(sensor.GetSensorType().ToString());
-		}
-		sensorSelector.ClearOptions();
-		sensorSelector.AddOptions(sensorNames);
-		sensorSelector.value = 0;
+	// private void UpdateSensorSelector()
+	// {
+	// 	List<string> sensorNames = new List<string>(){"OB_DEVICE"};
+	// 	foreach (var sensor in sensors)
+	// 	{
+	// 		sensorNames.Add(sensor.GetSensorType().ToString());
+	// 	}
+	// 	sensorSelector.ClearOptions();
+	// 	sensorSelector.AddOptions(sensorNames);
+	// 	sensorSelector.value = 0;
 
-		UpdatePropertySelector();
-	}
+	// 	UpdatePropertySelector();
+	// }
 
 	private void UpdatePropertySelector()
 	{
@@ -245,8 +254,6 @@ public class SensorControl : MonoBehaviour {
 			return;
 		}
 		string propertyStr = curProperty.ToString();
-		Debug.Log("GetProperty: " + propertyStr);
-		PrintLog("GetProperty: " + propertyStr);
 
 		setText.text = null;
 
@@ -298,6 +305,10 @@ public class SensorControl : MonoBehaviour {
 				}
 			}
 		}
+
+		string msg = "GetProperty: " + propertyStr + " " + getText.text;
+		Debug.Log(msg);
+		PrintLog(msg);
 		// else
 		// {
 		// 	if(propertyStr.EndsWith("BOOL"))
@@ -355,8 +366,6 @@ public class SensorControl : MonoBehaviour {
 			return;
 		}
 		string propertyStr = curProperty.ToString();
-		Debug.Log("SetProperty: " + propertyStr);
-		PrintLog("SetProperty: " + propertyStr);
 
 		if(curSensor == null)
 		{
@@ -400,6 +409,10 @@ public class SensorControl : MonoBehaviour {
 				}
 			}
 		}
+
+		string msg = "SetProperty: " + propertyStr + " " + setText.text;
+		Debug.Log(msg);
+		PrintLog(msg);
 		// else
 		// {
 		// 	if(propertyStr.EndsWith("BOOL"))
