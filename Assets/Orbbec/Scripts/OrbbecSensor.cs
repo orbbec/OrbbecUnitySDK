@@ -33,32 +33,18 @@ namespace OrbbecUnity
             }
         }
 
-        public void ConfigProfile(int width, int height, int fps, Format format)
-        {
-            this.orbbecProfile.width = width;
-            this.orbbecProfile.height = height;
-            this.orbbecProfile.fps = fps;
-            this.orbbecProfile.format = format;
-            ConfigProfile();
-        }
-
         private void ConfigProfile()
         {
-            streamProfile = null;
             var profileList = sensor.GetStreamProfileList();
-            for (int i = 0; i < profileList.ProfileCount(); i++)
+            streamProfile = profileList.GetVideoStreamProfile(orbbecProfile.width, orbbecProfile.height, orbbecProfile.format, orbbecProfile.fps);
+            if(streamProfile != null)
             {
-                var profile = profileList.GetProfile(i);
-                if(profile.GetWidth() == orbbecProfile.width && 
-                    profile.GetHeight() == orbbecProfile.height && 
-                    profile.GetFPS() == orbbecProfile.fps && 
-                    profile.GetFormat() == orbbecProfile.format)
-                {
-                    Debug.Log(string.Format("Profile found: {0}x{1}@{2} {3}", 
+                Debug.Log(string.Format("Profile found: {0}x{1}@{2} {3}", 
                         orbbecProfile.width, orbbecProfile.height, orbbecProfile.fps, orbbecProfile.format));
-                    streamProfile = profile;
-                    break;
-                }
+            }
+            else
+            {
+                Debug.LogWarning("Profile not found");
             }
         }
 

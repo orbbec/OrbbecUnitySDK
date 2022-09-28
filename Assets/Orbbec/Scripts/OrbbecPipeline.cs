@@ -11,7 +11,7 @@ namespace OrbbecUnity
     public class OrbbecPipeline : MonoBehaviour
     {
         public OrbbecDevice orbbecDevice;
-        public OrbbecConfig orbbecConfig;
+        public OrbbecProfile[] orbbecProfiles;
         public PipelineInitEvent onPipelineInit;
 
         private bool hasInit;
@@ -58,28 +58,23 @@ namespace OrbbecUnity
 
         private StreamProfile FindProfile(OrbbecProfile orbbecProfile)
         {
-            StreamProfile streamProfile = null;
             var profileList = pipeline.GetStreamProfileList(orbbecProfile.sensorType);
-            for (int i = 0; i < profileList.ProfileCount(); i++)
+            var streamProfile = profileList.GetVideoStreamProfile(orbbecProfile.width, orbbecProfile.height, orbbecProfile.format, orbbecProfile.fps);
+            if(streamProfile != null)
             {
-                var profile = profileList.GetProfile(i);
-                if(profile.GetWidth() == orbbecProfile.width && 
-                    profile.GetHeight() == orbbecProfile.height && 
-                    profile.GetFPS() == orbbecProfile.fps && 
-                    profile.GetFormat() == orbbecProfile.format)
-                {
-                    Debug.Log(string.Format("Profile found: {0}x{1}@{2} {3}", 
+                Debug.Log(string.Format("Profile found: {0}x{1}@{2} {3}", 
                         orbbecProfile.width, orbbecProfile.height, orbbecProfile.fps, orbbecProfile.format));
-                    streamProfile = profile;
-                    break;
-                }
+            }
+            else
+            {
+                Debug.LogWarning("Profile not found");
             }
             return streamProfile;
         }
 
         public void StartPipeline(FramesetCallback callback)
         {
-            foreach (var orbbecProfile in orbbecConfig.orbbecProfile)
+            foreach (var orbbecProfile in orbbecProfiles)
             {
                 var streamProfile = FindProfile(orbbecProfile);
                 if(streamProfile != null)
