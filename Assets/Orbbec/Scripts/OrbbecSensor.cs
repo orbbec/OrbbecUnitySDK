@@ -40,7 +40,7 @@ namespace OrbbecUnity
             if(streamProfile != null)
             {
                 Debug.Log(string.Format("Profile found: {0}x{1}@{2} {3}", 
-                        orbbecProfile.width, orbbecProfile.height, orbbecProfile.fps, orbbecProfile.format));
+                        streamProfile.GetWidth(), streamProfile.GetHeight(), streamProfile.GetFPS(), streamProfile.GetFormat()));
             }
             else
             {
