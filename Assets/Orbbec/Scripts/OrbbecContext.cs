@@ -23,6 +23,7 @@ namespace OrbbecUnity
                         var singletonObject = new GameObject();
                         instance = singletonObject.AddComponent<OrbbecContext>();
                         singletonObject.name = typeof(OrbbecContext).ToString();
+                        DontDestroyOnLoad(singletonObject);
                     }
                 }
 
