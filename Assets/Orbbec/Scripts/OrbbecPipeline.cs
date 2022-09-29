@@ -12,15 +12,12 @@ namespace OrbbecUnity
     {
         public OrbbecDevice orbbecDevice;
         public OrbbecProfile[] orbbecProfiles;
-        public bool record;
-        public string recordPath;
-        public bool playback;
-        public string playbackPath;
         public PipelineInitEvent onPipelineInit;
 
         private bool hasInit;
         private Pipeline pipeline;
         private Config config;
+        private FramesetCallback framesetCallback;
 
         public bool HasInit
         {
@@ -40,39 +37,22 @@ namespace OrbbecUnity
 
         void Start()
         {
-            if(!playback)
-            {
-                orbbecDevice.onDeviceFound.AddListener(InitPipeline);
-            }
-            else
-            {
-                InitPipeline(null);
-            }
+            orbbecDevice.onDeviceFound.AddListener(InitPipeline);
         }
 
         void OnDestroy()
         {
             if(hasInit)
             {
-                if(!playback)
-                {
-                    config.Dispose();
-                }
+                config.Dispose();
                 pipeline.Dispose();
             }
         }
 
         private void InitPipeline(Device device)
         {
-            if(!playback)
-            {
-                pipeline = new Pipeline(device);
-                InitConfig();
-            }
-            else
-            {
-                pipeline = new Pipeline(playbackPath);
-            }
+            pipeline = new Pipeline(device);
+            InitConfig();
             hasInit = true;
             onPipelineInit.Invoke();
         }
@@ -106,28 +86,18 @@ namespace OrbbecUnity
             return streamProfile;
         }
 
-        public void StartPipeline(FramesetCallback callback)
+        public void SetFramesetCallback(FramesetCallback callback)
         {
-            if(!playback)
-            {
-                pipeline.Start(config, callback);
-                if(record)
-                {
-                    pipeline.StartRecord(recordPath);
-                }
-            }
-            else
-            {
-                pipeline.Start(null, callback);
-            }
+            framesetCallback = callback;
+        }
+
+        public void StartPipeline()
+        {
+            pipeline.Start(config, framesetCallback);
         }
 
         public void StopPipeline()
         {
-            if(record)
-            {
-                pipeline.StopRecord();
-            }
             pipeline.Stop();
         }
     }

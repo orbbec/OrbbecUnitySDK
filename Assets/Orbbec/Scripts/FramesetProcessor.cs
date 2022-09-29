@@ -16,9 +16,7 @@ public class FramesetProcessor : MonoBehaviour
     // Start is called before the first frame update
     void Start()
     {
-        pipeline.onPipelineInit.AddListener(()=>{
-            pipeline.StartPipeline(OnFrameset);
-        });
+        pipeline.SetFramesetCallback(OnFrameset);
         
         obColorFrame = new OrbbecFrame();
         obDepthFrame = new OrbbecFrame();

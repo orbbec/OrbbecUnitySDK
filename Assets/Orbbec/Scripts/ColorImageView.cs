@@ -7,7 +7,7 @@ using UnityEngine.UI;
 
 public class ColorImageView : MonoBehaviour
 {
-    public FramesetProcessor framesetProcessor;
+    public OrbbecFrameSource frameSource;
 
     private Texture2D colorTexture;
     
@@ -21,7 +21,7 @@ public class ColorImageView : MonoBehaviour
     // Update is called once per frame
     void Update()
     {
-        OrbbecFrame obColorFrame = framesetProcessor.GetColorFrame();
+        OrbbecFrame obColorFrame = frameSource.GetColorFrame();
 
         if(obColorFrame == null || obColorFrame.width == 0 || obColorFrame.height == 0 || obColorFrame.data == null || obColorFrame.data.Length == 0)
         {

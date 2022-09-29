@@ -7,7 +7,7 @@ using UnityEngine.UI;
 
 public class DepthImageView : MonoBehaviour
 {
-    public FramesetProcessor framesetProcessor;
+    public OrbbecFrameSource frameSource;
 
     private Texture2D depthTexture;
     
@@ -21,7 +21,7 @@ public class DepthImageView : MonoBehaviour
     // Update is called once per frame
     void Update()
     {
-        OrbbecFrame obDepthFrame = framesetProcessor.GetDepthFrame();
+        OrbbecFrame obDepthFrame = frameSource.GetDepthFrame();
 
         if(obDepthFrame ==null || obDepthFrame.width == 0 || obDepthFrame.height == 0 || obDepthFrame.data == null || obDepthFrame.data.Length == 0)
         {

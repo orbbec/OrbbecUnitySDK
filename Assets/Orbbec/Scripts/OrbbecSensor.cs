@@ -11,6 +11,7 @@ namespace OrbbecUnity
 
         private Sensor sensor;
         private StreamProfile streamProfile;
+        private FrameCallback frameCallback;
 
         public Sensor Sensor
         {
@@ -48,9 +49,14 @@ namespace OrbbecUnity
             }
         }
 
-        public void StartStream(FrameCallback callback)
+        public void SetFrameCallback(FrameCallback callback)
         {
-            sensor.Start(streamProfile, callback);
+            frameCallback = callback;
+        }
+
+        public void StartStream()
+        {
+            sensor.Start(streamProfile, frameCallback);
         }
         
         public void StopStream()

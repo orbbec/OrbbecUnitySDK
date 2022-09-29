@@ -7,7 +7,7 @@ using UnityEngine.UI;
 
 public class IRImageView : MonoBehaviour
 {
-    public FramesetProcessor framesetProcessor;
+    public OrbbecFrameSource frameSource;
 
     private Texture2D irTexture;
     
@@ -21,7 +21,7 @@ public class IRImageView : MonoBehaviour
     // Update is called once per frame
     void Update()
     {
-        OrbbecFrame obIrFrame = framesetProcessor.GetIrFrame();
+        OrbbecFrame obIrFrame = frameSource.GetIrFrame();
 
         if(obIrFrame == null || obIrFrame.width == 0 || obIrFrame.height == 0 || obIrFrame.data == null || obIrFrame.data.Length == 0)
         {
