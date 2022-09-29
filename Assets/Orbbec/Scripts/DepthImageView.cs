@@ -23,7 +23,7 @@ public class DepthImageView : MonoBehaviour
     {
         OrbbecFrame obDepthFrame = framesetProcessor.GetDepthFrame();
 
-        if(obDepthFrame.width == 0 || obDepthFrame.height == 0 || obDepthFrame.data == null || obDepthFrame.data.Length == 0)
+        if(obDepthFrame ==null || obDepthFrame.width == 0 || obDepthFrame.height == 0 || obDepthFrame.data == null || obDepthFrame.data.Length == 0)
         {
             return;
         }

@@ -23,7 +23,7 @@ public class ColorImageView : MonoBehaviour
     {
         OrbbecFrame obColorFrame = framesetProcessor.GetColorFrame();
 
-        if(obColorFrame.width == 0 || obColorFrame.height == 0 || obColorFrame.data == null || obColorFrame.data.Length == 0)
+        if(obColorFrame == null || obColorFrame.width == 0 || obColorFrame.height == 0 || obColorFrame.data == null || obColorFrame.data.Length == 0)
         {
             return;
         }

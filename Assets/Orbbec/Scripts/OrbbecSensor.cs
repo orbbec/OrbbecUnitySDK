@@ -50,14 +50,7 @@ namespace OrbbecUnity
 
         public void StartStream(FrameCallback callback)
         {
-            if(streamProfile == null)
-            {
-                ConfigProfile();
-            }
-            if(streamProfile != null)
-            {
-                sensor.Start(streamProfile, callback);
-            }
+            sensor.Start(streamProfile, callback);
         }
         
         public void StopStream()
@@ -68,7 +61,8 @@ namespace OrbbecUnity
         private void InitSensor(Device device)
         {
             sensor = device.GetSensor(orbbecProfile.sensorType);
-            Debug.Log("Sensor found: " + orbbecProfile.sensorType);            
+            Debug.Log("Sensor found: " + orbbecProfile.sensorType);
+            ConfigProfile();     
         }
     }
 }

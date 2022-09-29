@@ -12,6 +12,10 @@ namespace OrbbecUnity
     {
         public OrbbecDevice orbbecDevice;
         public OrbbecProfile[] orbbecProfiles;
+        public bool record;
+        public string recordPath;
+        public bool playback;
+        public string playbackPath;
         public PipelineInitEvent onPipelineInit;
 
         private bool hasInit;
@@ -36,24 +40,54 @@ namespace OrbbecUnity
 
         void Start()
         {
-            orbbecDevice.onDeviceFound.AddListener(InitPipeline);
+            if(!playback)
+            {
+                orbbecDevice.onDeviceFound.AddListener(InitPipeline);
+            }
+            else
+            {
+                InitPipeline(null);
+            }
         }
 
         void OnDestroy()
         {
             if(hasInit)
             {
-                config.Dispose();
+                if(!playback)
+                {
+                    config.Dispose();
+                }
                 pipeline.Dispose();
             }
         }
 
         private void InitPipeline(Device device)
         {
-            pipeline = new Pipeline(device);
-            config = new Config();
+            if(!playback)
+            {
+                pipeline = new Pipeline(device);
+                InitConfig();
+            }
+            else
+            {
+                pipeline = new Pipeline(playbackPath);
+            }
             hasInit = true;
             onPipelineInit.Invoke();
+        }
+
+        private void InitConfig()
+        {
+            config = new Config();
+            foreach (var orbbecProfile in orbbecProfiles)
+            {
+                var streamProfile = FindProfile(orbbecProfile);
+                if(streamProfile != null)
+                {
+                    config.EnableStream(streamProfile);
+                }
+            }
         }
 
         private StreamProfile FindProfile(OrbbecProfile orbbecProfile)
@@ -74,19 +108,26 @@ namespace OrbbecUnity
 
         public void StartPipeline(FramesetCallback callback)
         {
-            foreach (var orbbecProfile in orbbecProfiles)
+            if(!playback)
             {
-                var streamProfile = FindProfile(orbbecProfile);
-                if(streamProfile != null)
+                pipeline.Start(config, callback);
+                if(record)
                 {
-                    config.EnableStream(streamProfile);
+                    pipeline.StartRecord(recordPath);
                 }
             }
-            pipeline.Start(config, callback);
+            else
+            {
+                pipeline.Start(null, callback);
+            }
         }
 
         public void StopPipeline()
         {
+            if(record)
+            {
+                pipeline.StopRecord();
+            }
             pipeline.Stop();
         }
     }

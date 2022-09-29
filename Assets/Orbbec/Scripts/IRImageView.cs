@@ -23,7 +23,7 @@ public class IRImageView : MonoBehaviour
     {
         OrbbecFrame obIrFrame = framesetProcessor.GetIrFrame();
 
-        if(obIrFrame.width == 0 || obIrFrame.height == 0 || obIrFrame.data == null || obIrFrame.data.Length == 0)
+        if(obIrFrame == null || obIrFrame.width == 0 || obIrFrame.height == 0 || obIrFrame.data == null || obIrFrame.data.Length == 0)
         {
             return;
         }
