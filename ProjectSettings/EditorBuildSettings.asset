@@ -4,5 +4,26 @@
 EditorBuildSettings:
   m_ObjectHideFlags: 0
   serializedVersion: 2
-  m_Scenes: []
+  m_Scenes:
+  - enabled: 1
+    path: Assets/Orbbec/Scenes/Main.unity
+    guid: 6e022393fa3d52645951166fc1ef9a1a
+  - enabled: 1
+    path: Assets/Orbbec/Scenes/ColorViewer.unity
+    guid: 6a8cdd60982efc84b8143fe39afeec17
+  - enabled: 1
+    path: Assets/Orbbec/Scenes/DepthViewer.unity
+    guid: 06af3116746e8c44297f0a7ff079bea9
+  - enabled: 1
+    path: Assets/Orbbec/Scenes/HelloOrbbec.unity
+    guid: ee9d286fa2b6ac043934c235ec4b2495
+  - enabled: 1
+    path: Assets/Orbbec/Scenes/IRViewer.unity
+    guid: 238bc141c709d4449b08b4fa8c4bc7cc
+  - enabled: 1
+    path: Assets/Orbbec/Scenes/SensorControl.unity
+    guid: c6bfef01b31fe81449043956dd165481
+  - enabled: 1
+    path: Assets/Orbbec/Scenes/SyncAlignViewer.unity
+    guid: bd0e11f22ff0b0647bdb3f686c4fbf6a
   m_configObjects: {}
