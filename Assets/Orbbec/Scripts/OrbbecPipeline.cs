@@ -35,6 +35,14 @@ namespace OrbbecUnity
             }
         }
 
+        public Config Config
+        {
+            get
+            {
+                return config;
+            }
+        }
+
         void Start()
         {
             orbbecDevice.onDeviceFound.AddListener(InitPipeline);
