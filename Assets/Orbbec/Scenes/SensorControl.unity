@@ -2152,7 +2152,7 @@ MonoBehaviour:
   m_Name: 
   m_EditorClassIdentifier: 
   m_Content: {fileID: 790445691}
-  m_Horizontal: 1
+  m_Horizontal: 0
   m_Vertical: 1
   m_MovementType: 1
   m_Elasticity: 0.1
@@ -3623,6 +3623,7 @@ MonoBehaviour:
   getText: {fileID: 1296696146}
   setText: {fileID: 2088120403}
   logText: {fileID: 790445693}
+  scrollView: {fileID: 683123516}
 --- !u!4 &1717944955
 Transform:
   m_ObjectHideFlags: 0

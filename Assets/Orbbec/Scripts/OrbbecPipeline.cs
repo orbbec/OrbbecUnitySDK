@@ -78,14 +78,17 @@ namespace OrbbecUnity
             }
         }
 
-        private StreamProfile FindProfile(OrbbecProfile orbbecProfile)
+        private StreamProfile FindProfile(OrbbecProfile obProfile)
         {
-            var profileList = pipeline.GetStreamProfileList(orbbecProfile.sensorType);
-            var streamProfile = profileList.GetVideoStreamProfile(orbbecProfile.width, orbbecProfile.height, orbbecProfile.format, orbbecProfile.fps);
+            var profileList = pipeline.GetStreamProfileList(obProfile.sensorType);
+            var streamProfile = profileList.GetVideoStreamProfile(obProfile.width, obProfile.height, obProfile.format, obProfile.fps);
             if(streamProfile != null)
             {
-                Debug.Log(string.Format("Profile found: {0}x{1}@{2} {3}", 
-                        streamProfile.GetWidth(), streamProfile.GetHeight(), streamProfile.GetFPS(), streamProfile.GetFormat()));
+                Debug.LogFormat("Profile found: {0}x{1}@{2} {3}", 
+                        streamProfile.GetWidth(), 
+                        streamProfile.GetHeight(), 
+                        streamProfile.GetFPS(), 
+                        streamProfile.GetFormat());
             }
             else
             {

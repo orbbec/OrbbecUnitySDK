@@ -51,12 +51,12 @@ namespace OrbbecUnity
                 {
                     device = deviceList.GetDevice((uint)deviceIndex);
                     DeviceInfo deviceInfo = device.GetDeviceInfo();
-                    Debug.Log(string.Format(
+                    Debug.LogFormat(
                         "Device found: {0} {1} {2:X} {3:X}", 
                         deviceInfo.Name(), 
                         deviceInfo.SerialNumber(),
                         deviceInfo.Vid(),
-                        deviceInfo.Pid()));
+                        deviceInfo.Pid());
                     deviceList.Dispose();
                     onDeviceFound.Invoke(device);
                     break;

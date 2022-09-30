@@ -23,14 +23,22 @@ public class SyncAlignController : MonoBehaviour
     {
 		syncToggle.onValueChanged.AddListener((value) =>
 		{
-			if(value)
+			try
 			{
-				pipeline.Pipeline.EnableFrameSync();
+				if(value)
+				{
+					pipeline.Pipeline.EnableFrameSync();
+				}
+				else
+				{
+					pipeline.Pipeline.DisableFrameSync();
+				}
 			}
-			else
+			catch (System.Exception)
 			{
-				pipeline.Pipeline.DisableFrameSync();
+				Debug.LogWarning("Device not support frame sync");
 			}
+
 		});
 		
 		hardAlignToggle.onValueChanged.AddListener((value) =>

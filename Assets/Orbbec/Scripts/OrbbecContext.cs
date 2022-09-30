@@ -66,10 +66,10 @@ namespace OrbbecUnity
 
         private void InitSDK()
         {
-            Debug.Log(string.Format("Orbbec SDK version: {0}.{1}.{2}",
+            Debug.LogFormat("Orbbec SDK version: {0}.{1}.{2}",
                                         Version.GetMajorVersion(),
                                         Version.GetMinorVersion(),
-                                        Version.GetPatchVersion()));
+                                        Version.GetPatchVersion());
             context = new Context();
 #if !UNITY_EDITOR && UNITY_ANDROID
             AndroidDeviceManager.Init();

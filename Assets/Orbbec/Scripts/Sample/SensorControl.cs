@@ -16,6 +16,7 @@ public class SensorControl : MonoBehaviour {
 	public Text getText;
 	public InputField setText;
 	public Text logText;
+	public ScrollRect scrollView;
 
 	private Context context;
     private List<Device> devices;
@@ -79,14 +80,8 @@ public class SensorControl : MonoBehaviour {
 	private void OnDeviceInit()
 	{
 		curDevice = devices[0];
-		UpdateProperties();
 		UpdateDeviceSelector();
-		UpdatePropertySelector();
-	}
-
-	private void OnDeviceAdd()
-	{
-		UpdateDeviceSelector();
+		OnDeviceSelect(0);
 	}
 
 	private void UpdateProperties()
@@ -127,17 +122,35 @@ public class SensorControl : MonoBehaviour {
 	private void OnDeviceSelect(int index)
 	{
 		curDevice = devices[index];
+		PrintLog("DeviceSelect: " + curDevice.GetDeviceInfo().Name());
 		UpdateProperties();
 		UpdatePropertySelector();
-		Debug.Log("DeviceSelect: " + curDevice.GetDeviceInfo().Name());
-		PrintLog("DeviceSelect: " + curDevice.GetDeviceInfo().Name());
 	}
 
 	private void OnPropertySelect(int index)
 	{
 		curProperty = propertyIds[index];
+
 		string propertyStr = curProperty.ToString();
-		Debug.Log("PropertySelect: " + propertyStr);
+
+		setText.text = null;
+		getText.text = null;
+
+		if(propertyStr.EndsWith("BOOL"))
+		{
+			BoolPropertyRange range = curDevice.GetBoolPropertyRange(curProperty);
+			((Text)setText.placeholder).text = string.Format("[{0}-{1}]", range.min ? 1 : 0, range.max ? 1 : 0);
+		}
+		else if(propertyStr.EndsWith("INT"))
+		{
+			IntPropertyRange range = curDevice.GetIntPropertyRange(curProperty);
+			((Text)setText.placeholder).text = string.Format("[{0}-{1}]", range.min, range.max);
+		}
+		else if(propertyStr.EndsWith("FLOAT"))
+		{
+			FloatPropertyRange range = curDevice.GetFloatPropertyRange(curProperty);
+			((Text)setText.placeholder).text = string.Format("[{0}-{1}]", range.min, range.max);
+		}
 		PrintLog("PropertySelect: " + propertyStr);
 	}
 
@@ -162,7 +175,14 @@ public class SensorControl : MonoBehaviour {
 		}
 		propertySelector.ClearOptions();
 		propertySelector.AddOptions(propertyNames);
-		propertySelector.value = 0;
+		if(propertySelector.value == 0)
+		{
+			OnPropertySelect(0);
+		}
+		else
+		{
+			propertySelector.value = 0;
+		}
 	}
 
 	private void OnGetProperty()
@@ -175,56 +195,32 @@ public class SensorControl : MonoBehaviour {
 		string propertyStr = curProperty.ToString();
 
 		setText.text = null;
+		getText.text = null;
 
 		if(propertyStr.EndsWith("BOOL"))
 		{
-			try
-			{
-				bool value = curDevice.GetBoolProperty(curProperty);
-				getText.text = (value ? 1 : 0).ToString();
-				BoolPropertyRange range = curDevice.GetBoolPropertyRange(curProperty);
-				((Text)setText.placeholder).text = string.Format("[{0}-{1}]", range.min ? 1 : 0, range.max ? 1 : 0);
-			}
-			catch(NativeException e)
-			{
-				Debug.Log(e.Message);
-				PrintLog(e.Message);
-			}
+			bool value = curDevice.GetBoolProperty(curProperty);
+			getText.text = (value ? 1 : 0).ToString();
+			BoolPropertyRange range = curDevice.GetBoolPropertyRange(curProperty);
+			((Text)setText.placeholder).text = string.Format("[{0}-{1}]", range.min ? 1 : 0, range.max ? 1 : 0);
+			PrintLog("GetProperty: " + propertyStr + " " + getText.text);
 		}
 		else if(propertyStr.EndsWith("INT"))
 		{
-			try
-			{
-				int value = curDevice.GetIntProperty(curProperty);
-				getText.text = value.ToString();
-				IntPropertyRange range = curDevice.GetIntPropertyRange(curProperty);
-				((Text)setText.placeholder).text = string.Format("[{0}-{1}]", range.min, range.max);
-			}
-			catch(NativeException e)
-			{
-				Debug.Log(e.Message);
-				PrintLog(e.Message);
-			}
+			int value = curDevice.GetIntProperty(curProperty);
+			getText.text = value.ToString();
+			IntPropertyRange range = curDevice.GetIntPropertyRange(curProperty);
+			((Text)setText.placeholder).text = string.Format("[{0}-{1}]", range.min, range.max);
+			PrintLog("GetProperty: " + propertyStr + " " + getText.text);
 		}
 		else if(propertyStr.EndsWith("FLOAT"))
 		{
-			try
-			{
-				float value = curDevice.GetFloatProperty(curProperty);
-				getText.text = value.ToString();
-				FloatPropertyRange range = curDevice.GetFloatPropertyRange(curProperty);
-				((Text)setText.placeholder).text = string.Format("[{0}-{1}]", range.min, range.max);
-			}
-			catch(NativeException e)
-			{
-				Debug.Log(e.Message);
-				PrintLog(e.Message);
-			}
+			float value = curDevice.GetFloatProperty(curProperty);
+			getText.text = value.ToString();
+			FloatPropertyRange range = curDevice.GetFloatPropertyRange(curProperty);
+			((Text)setText.placeholder).text = string.Format("[{0}-{1}]", range.min, range.max);
+			PrintLog("GetProperty: " + propertyStr + " " + getText.text);
 		}
-
-		string msg = "GetProperty: " + propertyStr + " " + getText.text;
-		Debug.Log(msg);
-		PrintLog(msg);
 	}
 
 	private void OnSetProperty()
@@ -238,51 +234,37 @@ public class SensorControl : MonoBehaviour {
 
 		if(propertyStr.EndsWith("BOOL"))
 		{
-			try
+			int value;
+			if(int.TryParse(setText.text, out value))
 			{
-				bool value = int.Parse(setText.text) == 1 ? true : false;
-				curDevice.SetBoolProperty(curProperty, value);
-			}
-			catch(NativeException e)
-			{
-				Debug.Log(e.Message);
-				PrintLog(e.Message);
+				curDevice.SetBoolProperty(curProperty, value == 1 ? true : false);
+				PrintLog("SetProperty: " + propertyStr + " " + setText.text);
 			}
 		}
 		else if(propertyStr.EndsWith("INT"))
 		{
-			try
+			int value;
+			if(int.TryParse(setText.text, out value))
 			{
-				int value = int.Parse(setText.text);
 				curDevice.SetIntProperty(curProperty, value);
-			}
-			catch(NativeException e)
-			{
-				Debug.Log(e.Message);
-				PrintLog(e.Message);
+				PrintLog("SetProperty: " + propertyStr + " " + setText.text);
 			}
 		}
 		else if(propertyStr.EndsWith("FLOAT"))
 		{
-			try
+			float value;
+			if(float.TryParse(setText.text, out value))
 			{
-				float value = float.Parse(setText.text);
 				curDevice.SetFloatProperty(curProperty, value);
-			}
-			catch(NativeException e)
-			{
-				Debug.Log(e.Message);
-				PrintLog(e.Message);
+				PrintLog("SetProperty: " + propertyStr + " " + setText.text);
 			}
 		}
-
-		string msg = "SetProperty: " + propertyStr + " " + setText.text;
-		Debug.Log(msg);
-		PrintLog(msg);
 	}
 
 	private void PrintLog(string msg)
 	{
+		Debug.Log(msg);
+
 		if(stringBuilder == null)
 		{
 			stringBuilder = new StringBuilder();
@@ -290,6 +272,8 @@ public class SensorControl : MonoBehaviour {
 		stringBuilder.AppendLine(msg);
 
 		logText.text = stringBuilder.ToString();
+
+		scrollView.verticalNormalizedPosition = 0;
 	}
 }
 }
