@@ -27,6 +27,10 @@ public class DepthImageView : MonoBehaviour
         {
             return;
         }
+        if(obDepthFrame.frameType != FrameType.OB_FRAME_DEPTH)
+        {
+            return;
+        }
         if(depthTexture.width != obDepthFrame.width || depthTexture.height != obDepthFrame.height)
         {
             depthTexture.Resize(obDepthFrame.width, obDepthFrame.height);

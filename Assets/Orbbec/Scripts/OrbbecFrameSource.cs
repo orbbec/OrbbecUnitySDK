@@ -18,6 +18,8 @@ namespace OrbbecUnity
             {
                 orbbecFrame.width = (int)frame.GetWidth();
                 orbbecFrame.height = (int)frame.GetHeight();
+                orbbecFrame.frameType = frame.GetFrameType();
+                orbbecFrame.format = frame.GetFormat();
                 var dataSize = frame.GetDataSize();
                 if (orbbecFrame.data == null || orbbecFrame.data.Length != dataSize)
                 {

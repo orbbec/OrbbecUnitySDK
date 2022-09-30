@@ -27,6 +27,10 @@ public class IRImageView : MonoBehaviour
         {
             return;
         }
+        if(obIrFrame.frameType != FrameType.OB_FRAME_IR)
+        {
+            return;
+        }
         if(irTexture.width != obIrFrame.width || irTexture.height != obIrFrame.height)
         {
             irTexture.Resize(obIrFrame.width, obIrFrame.height);
