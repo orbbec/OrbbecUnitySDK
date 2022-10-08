@@ -15,5 +15,5 @@ MonoBehaviour:
   sensorType: 3
   width: 640
   height: 0
-  fps: 0
+  fps: 30
   format: 255
