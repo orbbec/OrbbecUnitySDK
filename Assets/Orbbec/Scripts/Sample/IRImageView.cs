@@ -11,14 +11,7 @@ public class IRImageView : MonoBehaviour
 
     private Texture2D irTexture;
     
-    // Start is called before the first frame update
-    void Start()
-    {
-        irTexture = new Texture2D(2, 2, TextureFormat.RG16, false);
-        GetComponent<Renderer>().material.mainTexture = irTexture;
-    }
 
-    // Update is called once per frame
     void Update()
     {
         OrbbecFrame obIrFrame = frameSource.GetIrFrame();
@@ -30,6 +23,11 @@ public class IRImageView : MonoBehaviour
         if(obIrFrame.frameType != FrameType.OB_FRAME_IR)
         {
             return;
+        }
+        if(irTexture == null)
+        {
+            irTexture = new Texture2D(obIrFrame.width, obIrFrame.height, TextureFormat.RG16, false);
+            GetComponent<Renderer>().material.mainTexture = irTexture;
         }
         if(irTexture.width != obIrFrame.width || irTexture.height != obIrFrame.height)
         {

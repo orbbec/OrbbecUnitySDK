@@ -11,14 +11,7 @@ public class ColorImageView : MonoBehaviour
 
     private Texture2D colorTexture;
     
-    // Start is called before the first frame update
-    void Start()
-    {        
-        colorTexture = new Texture2D(2, 2, TextureFormat.RGB24, false);
-        GetComponent<Renderer>().material.mainTexture = colorTexture;
-    }
 
-    // Update is called once per frame
     void Update()
     {
         OrbbecFrame obColorFrame = frameSource.GetColorFrame();
@@ -30,6 +23,11 @@ public class ColorImageView : MonoBehaviour
         if(obColorFrame.frameType != FrameType.OB_FRAME_COLOR || obColorFrame.format != Format.OB_FORMAT_RGB888)
         {
             return;
+        }
+        if(colorTexture == null)
+        {
+            colorTexture = new Texture2D(obColorFrame.width, obColorFrame.height, TextureFormat.RGB24, false);
+            GetComponent<Renderer>().material.mainTexture = colorTexture;
         }
         if(colorTexture.width != obColorFrame.width || colorTexture.height != obColorFrame.height)
         {

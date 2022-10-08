@@ -11,14 +11,7 @@ public class DepthImageView : MonoBehaviour
 
     private Texture2D depthTexture;
     
-    // Start is called before the first frame update
-    void Start()
-    {
-        depthTexture = new Texture2D(2, 2, TextureFormat.RG16, false);
-        GetComponent<Renderer>().material.mainTexture = depthTexture;
-    }
 
-    // Update is called once per frame
     void Update()
     {
         OrbbecFrame obDepthFrame = frameSource.GetDepthFrame();
@@ -30,6 +23,11 @@ public class DepthImageView : MonoBehaviour
         if(obDepthFrame.frameType != FrameType.OB_FRAME_DEPTH)
         {
             return;
+        }
+        if(depthTexture == null)
+        {
+            depthTexture = new Texture2D(obDepthFrame.width, obDepthFrame.height, TextureFormat.RG16, false);
+            GetComponent<Renderer>().material.mainTexture = depthTexture;
         }
         if(depthTexture.width != obDepthFrame.width || depthTexture.height != obDepthFrame.height)
         {
