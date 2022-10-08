@@ -136,22 +136,29 @@ public class SensorControl : MonoBehaviour {
 		setText.text = null;
 		getText.text = null;
 
-		if(propertyStr.EndsWith("BOOL"))
+		try
 		{
-			BoolPropertyRange range = curDevice.GetBoolPropertyRange(curProperty);
-			((Text)setText.placeholder).text = string.Format("[{0}-{1}]", range.min ? 1 : 0, range.max ? 1 : 0);
+			if(propertyStr.EndsWith("BOOL"))
+			{
+				BoolPropertyRange range = curDevice.GetBoolPropertyRange(curProperty);
+				((Text)setText.placeholder).text = string.Format("[{0}-{1}]", range.min ? 1 : 0, range.max ? 1 : 0);
+			}
+			else if(propertyStr.EndsWith("INT"))
+			{
+				IntPropertyRange range = curDevice.GetIntPropertyRange(curProperty);
+				((Text)setText.placeholder).text = string.Format("[{0}-{1}]", range.min, range.max);
+			}
+			else if(propertyStr.EndsWith("FLOAT"))
+			{
+				FloatPropertyRange range = curDevice.GetFloatPropertyRange(curProperty);
+				((Text)setText.placeholder).text = string.Format("[{0}-{1}]", range.min, range.max);
+			}
+			PrintLog("PropertySelect: " + propertyStr);
 		}
-		else if(propertyStr.EndsWith("INT"))
+		catch (NativeException e)
 		{
-			IntPropertyRange range = curDevice.GetIntPropertyRange(curProperty);
-			((Text)setText.placeholder).text = string.Format("[{0}-{1}]", range.min, range.max);
+			PrintLog(e.Message);
 		}
-		else if(propertyStr.EndsWith("FLOAT"))
-		{
-			FloatPropertyRange range = curDevice.GetFloatPropertyRange(curProperty);
-			((Text)setText.placeholder).text = string.Format("[{0}-{1}]", range.min, range.max);
-		}
-		PrintLog("PropertySelect: " + propertyStr);
 	}
 
 	private void UpdateDeviceSelector()
@@ -197,29 +204,36 @@ public class SensorControl : MonoBehaviour {
 		setText.text = null;
 		getText.text = null;
 
-		if(propertyStr.EndsWith("BOOL"))
+		try
 		{
-			bool value = curDevice.GetBoolProperty(curProperty);
-			getText.text = (value ? 1 : 0).ToString();
-			BoolPropertyRange range = curDevice.GetBoolPropertyRange(curProperty);
-			((Text)setText.placeholder).text = string.Format("[{0}-{1}]", range.min ? 1 : 0, range.max ? 1 : 0);
-			PrintLog("GetProperty: " + propertyStr + " " + getText.text);
+			if(propertyStr.EndsWith("BOOL"))
+			{
+				bool value = curDevice.GetBoolProperty(curProperty);
+				getText.text = (value ? 1 : 0).ToString();
+				BoolPropertyRange range = curDevice.GetBoolPropertyRange(curProperty);
+				((Text)setText.placeholder).text = string.Format("[{0}-{1}]", range.min ? 1 : 0, range.max ? 1 : 0);
+				PrintLog("GetProperty: " + propertyStr + " " + getText.text);
+			}
+			else if(propertyStr.EndsWith("INT"))
+			{
+				int value = curDevice.GetIntProperty(curProperty);
+				getText.text = value.ToString();
+				IntPropertyRange range = curDevice.GetIntPropertyRange(curProperty);
+				((Text)setText.placeholder).text = string.Format("[{0}-{1}]", range.min, range.max);
+				PrintLog("GetProperty: " + propertyStr + " " + getText.text);
+			}
+			else if(propertyStr.EndsWith("FLOAT"))
+			{
+				float value = curDevice.GetFloatProperty(curProperty);
+				getText.text = value.ToString();
+				FloatPropertyRange range = curDevice.GetFloatPropertyRange(curProperty);
+				((Text)setText.placeholder).text = string.Format("[{0}-{1}]", range.min, range.max);
+				PrintLog("GetProperty: " + propertyStr + " " + getText.text);
+			}		
 		}
-		else if(propertyStr.EndsWith("INT"))
+		catch (NativeException e)
 		{
-			int value = curDevice.GetIntProperty(curProperty);
-			getText.text = value.ToString();
-			IntPropertyRange range = curDevice.GetIntPropertyRange(curProperty);
-			((Text)setText.placeholder).text = string.Format("[{0}-{1}]", range.min, range.max);
-			PrintLog("GetProperty: " + propertyStr + " " + getText.text);
-		}
-		else if(propertyStr.EndsWith("FLOAT"))
-		{
-			float value = curDevice.GetFloatProperty(curProperty);
-			getText.text = value.ToString();
-			FloatPropertyRange range = curDevice.GetFloatPropertyRange(curProperty);
-			((Text)setText.placeholder).text = string.Format("[{0}-{1}]", range.min, range.max);
-			PrintLog("GetProperty: " + propertyStr + " " + getText.text);
+			PrintLog(e.Message);
 		}
 	}
 
@@ -232,32 +246,39 @@ public class SensorControl : MonoBehaviour {
 		
 		string propertyStr = curProperty.ToString();
 
-		if(propertyStr.EndsWith("BOOL"))
+		try
 		{
-			int value;
-			if(int.TryParse(setText.text, out value))
+			if(propertyStr.EndsWith("BOOL"))
 			{
-				curDevice.SetBoolProperty(curProperty, value == 1 ? true : false);
-				PrintLog("SetProperty: " + propertyStr + " " + setText.text);
+				int value;
+				if(int.TryParse(setText.text, out value))
+				{
+					curDevice.SetBoolProperty(curProperty, value == 1 ? true : false);
+					PrintLog("SetProperty: " + propertyStr + " " + setText.text);
+				}
+			}
+			else if(propertyStr.EndsWith("INT"))
+			{
+				int value;
+				if(int.TryParse(setText.text, out value))
+				{
+					curDevice.SetIntProperty(curProperty, value);
+					PrintLog("SetProperty: " + propertyStr + " " + setText.text);
+				}
+			}
+			else if(propertyStr.EndsWith("FLOAT"))
+			{
+				float value;
+				if(float.TryParse(setText.text, out value))
+				{
+					curDevice.SetFloatProperty(curProperty, value);
+					PrintLog("SetProperty: " + propertyStr + " " + setText.text);
+				}
 			}
 		}
-		else if(propertyStr.EndsWith("INT"))
+		catch (NativeException e)
 		{
-			int value;
-			if(int.TryParse(setText.text, out value))
-			{
-				curDevice.SetIntProperty(curProperty, value);
-				PrintLog("SetProperty: " + propertyStr + " " + setText.text);
-			}
-		}
-		else if(propertyStr.EndsWith("FLOAT"))
-		{
-			float value;
-			if(float.TryParse(setText.text, out value))
-			{
-				curDevice.SetFloatProperty(curProperty, value);
-				PrintLog("SetProperty: " + propertyStr + " " + setText.text);
-			}
+			PrintLog(e.Message);
 		}
 	}
 
