@@ -10,7 +10,7 @@ namespace OrbbecUnity
         public OrbbecProfile orbbecProfile;
 
         private Sensor sensor;
-        private StreamProfile streamProfile;
+        private VideoStreamProfile streamProfile;
         private FrameCallback frameCallback;
 
         public Sensor Sensor

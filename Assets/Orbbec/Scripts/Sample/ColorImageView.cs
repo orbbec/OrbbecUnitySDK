@@ -14,7 +14,7 @@ public class ColorImageView : MonoBehaviour
 
     void Update()
     {
-        OrbbecFrame obColorFrame = frameSource.GetColorFrame();
+        var obColorFrame = frameSource.GetColorFrame();
 
         if(obColorFrame == null || obColorFrame.width == 0 || obColorFrame.height == 0 || obColorFrame.data == null || obColorFrame.data.Length == 0)
         {

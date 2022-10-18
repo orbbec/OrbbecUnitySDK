@@ -14,7 +14,7 @@ public class IRImageView : MonoBehaviour
 
     void Update()
     {
-        OrbbecFrame obIrFrame = frameSource.GetIrFrame();
+        var obIrFrame = frameSource.GetIrFrame();
 
         if(obIrFrame == null || obIrFrame.width == 0 || obIrFrame.height == 0 || obIrFrame.data == null || obIrFrame.data.Length == 0)
         {

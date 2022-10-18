@@ -8,11 +8,11 @@ namespace OrbbecUnity
 {
     public class OrbbecFrameSource : MonoBehaviour
     {
-        protected OrbbecFrame obColorFrame = new OrbbecFrame();
-        protected OrbbecFrame obDepthFrame = new OrbbecFrame();
-        protected OrbbecFrame obIrFrame = new OrbbecFrame();
+        protected OrbbecVideoFrame obColorFrame = new OrbbecVideoFrame();
+        protected OrbbecVideoFrame obDepthFrame = new OrbbecVideoFrame();
+        protected OrbbecVideoFrame obIrFrame = new OrbbecVideoFrame();
 
-        protected void FrameToOrbbecFrame(VideoFrame frame, ref OrbbecFrame orbbecFrame)
+        protected void FrameToOrbbecFrame(VideoFrame frame, ref OrbbecVideoFrame orbbecFrame)
         {
             if (frame != null)
             {
@@ -30,17 +30,17 @@ namespace OrbbecUnity
             }
         }
 
-        public OrbbecFrame GetColorFrame()
+        public OrbbecVideoFrame GetColorFrame()
         {
             return obColorFrame;
         }
 
-        public OrbbecFrame GetDepthFrame()
+        public OrbbecVideoFrame GetDepthFrame()
         {
             return obDepthFrame;
         }
 
-        public OrbbecFrame GetIrFrame()
+        public OrbbecVideoFrame GetIrFrame()
         {
             return obIrFrame;
         }
