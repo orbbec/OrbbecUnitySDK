@@ -1,4 +1,15 @@
-﻿using System;
+﻿/**
+ * 同步对齐示例
+ *
+ * 该示例可能会由于深度或者彩色sensor不支持镜像而出现深度图和彩色图镜像状态不一致的情况，
+ * 从而导致深度图和彩色图显示的图像是相反的，如遇到该情况，则通过设置镜像接口保持两个镜像状态一致即可
+ * 另外可能存在某些设备获取到的分辨率不支持D2C功能，因此D2C功能以实际支持的D2C分辨率为准
+ *
+ * 例如：DaBai DCW支持的D2C的分辨率为640x360，而实际该示例获取到的分辨率可能为640x480，此时用户根据实际模组情况获取
+ * 对应的640x360分辨率即可
+ */
+
+using System;
 using System.Collections;
 using System.Collections.Generic;
 using Orbbec;
@@ -29,7 +40,6 @@ public class IMUReader : MonoBehaviour
     {
         try
         {
-
             accelSensor = device.GetSensor(SensorType.OB_SENSOR_ACCEL);
             var accelProfileList = accelSensor.GetStreamProfileList();
             var accelProfile = accelProfileList.GetProfile(0);
@@ -57,28 +67,36 @@ public class IMUReader : MonoBehaviour
         if(frame.GetFrameType() == FrameType.OB_FRAME_ACCEL)
         {
             var accelFrame = frame.As<AccelFrame>();
-            var accelValue = accelFrame.GetAccelValue();
-            obAccelFrame = new OrbbecImuFrame();
-            obAccelFrame.value = new Vector3(accelValue.x, accelValue.y, accelValue.z);
-            obAccelFrame.format = Format.OB_FORMAT_ACCEL;
-            obAccelFrame.frameType = FrameType.OB_FRAME_ACCEL;
-            obAccelFrame.timestamp = accelFrame.GetTimeStamp();
-            obAccelFrame.systemTimestamp = accelFrame.GetSystemTimeStamp();
-            obAccelFrame.temperature = accelFrame.GetTemperature();
-            accelFrame.Dispose();
+            if(accelFrame != null)
+            {
+                var accelValue = accelFrame.GetAccelValue();
+                obAccelFrame = new OrbbecImuFrame();
+                obAccelFrame.value = new Vector3(accelValue.x, accelValue.y, accelValue.z);
+                obAccelFrame.format = Format.OB_FORMAT_ACCEL;
+                obAccelFrame.frameType = FrameType.OB_FRAME_ACCEL;
+                obAccelFrame.timestamp = accelFrame.GetTimeStamp();
+                obAccelFrame.systemTimestamp = accelFrame.GetSystemTimeStamp();
+                obAccelFrame.temperature = accelFrame.GetTemperature();
+                // Debug.LogFormat("AccelFrame:({0},{1},{2})", accelValue.x, accelValue.y, accelValue.z);
+                accelFrame.Dispose();
+            }
         }
         if(frame.GetFrameType() == FrameType.OB_FRAME_GYRO)
         {
             var gyroFrame = frame.As<GyroFrame>();
-            var gyroValue = gyroFrame.GetGyroValue();
-            obGyroFrame = new OrbbecImuFrame();
-            obGyroFrame.value = new Vector3(gyroValue.x, gyroValue.y, gyroValue.z);
-            obGyroFrame.format = Format.OB_FORMAT_GRAY;
-            obGyroFrame.frameType = FrameType.OB_FRAME_GYRO;
-            obGyroFrame.timestamp = gyroFrame.GetTimeStamp();
-            obGyroFrame.systemTimestamp = gyroFrame.GetSystemTimeStamp();
-            obGyroFrame.temperature = gyroFrame.GetTemperature();
-            gyroFrame.Dispose();
+            if(gyroFrame != null)
+            {
+                var gyroValue = gyroFrame.GetGyroValue();
+                obGyroFrame = new OrbbecImuFrame();
+                obGyroFrame.value = new Vector3(gyroValue.x, gyroValue.y, gyroValue.z);
+                obGyroFrame.format = Format.OB_FORMAT_GRAY;
+                obGyroFrame.frameType = FrameType.OB_FRAME_GYRO;
+                obGyroFrame.timestamp = gyroFrame.GetTimeStamp();
+                obGyroFrame.systemTimestamp = gyroFrame.GetSystemTimeStamp();
+                obGyroFrame.temperature = gyroFrame.GetTemperature();
+                // Debug.LogFormat("GyroFrame:({0},{1},{2})", gyroValue.x, gyroValue.y, gyroValue.z);
+                gyroFrame.Dispose();
+            }
         }
         frame.Dispose();
     }
