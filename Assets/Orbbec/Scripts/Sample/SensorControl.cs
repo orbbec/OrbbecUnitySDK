@@ -2,11 +2,10 @@
 using System.Collections.Generic;
 using System.Text;
 using Orbbec;
+using OrbbecUnity;
 using UnityEngine;
 using UnityEngine.UI;
 
-namespace OrbbecUnity
-{
 public class SensorControl : MonoBehaviour {
 
 	public Dropdown deviceSelector;
@@ -296,5 +295,4 @@ public class SensorControl : MonoBehaviour {
 
 		scrollView.verticalNormalizedPosition = 0;
 	}
-}
 }

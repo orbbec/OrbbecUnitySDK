@@ -1,23 +1,26 @@
 using Orbbec;
 using UnityEngine;
 
-public class OrbbecFrame
+namespace OrbbecUnity
 {
-    public byte[] data;
-    public FrameType frameType;
-    public Format format;
-    public ulong systemTimestamp;
-    public ulong timestamp;
-}
+    public class OrbbecFrame
+    {
+        public byte[] data;
+        public FrameType frameType;
+        public Format format;
+        public ulong systemTimestamp;
+        public ulong timestamp;
+    }
 
-public class OrbbecVideoFrame : OrbbecFrame
-{
-    public int width;
-    public int height;
-}
+    public class OrbbecVideoFrame : OrbbecFrame
+    {
+        public int width;
+        public int height;
+    }
 
-public class OrbbecImuFrame : OrbbecFrame
-{
-    public Vector3 value;
-    public float temperature;
+    public class OrbbecImuFrame : OrbbecFrame
+    {
+        public Vector3 value;
+        public float temperature;
+    }
 }
