@@ -67,7 +67,7 @@ public class IMUReader : MonoBehaviour
                 obAccelFrame.systemTimestamp = accelFrame.GetSystemTimeStamp();
                 obAccelFrame.temperature = accelFrame.GetTemperature();
                 // Debug.LogFormat("AccelFrame:({0},{1},{2})", accelValue.x, accelValue.y, accelValue.z);
-                accelFrame.Dispose();
+                // accelFrame.Dispose();
             }
         }
         if(frame.GetFrameType() == FrameType.OB_FRAME_GYRO)
@@ -84,7 +84,7 @@ public class IMUReader : MonoBehaviour
                 obGyroFrame.systemTimestamp = gyroFrame.GetSystemTimeStamp();
                 obGyroFrame.temperature = gyroFrame.GetTemperature();
                 // Debug.LogFormat("GyroFrame:({0},{1},{2})", gyroValue.x, gyroValue.y, gyroValue.z);
-                gyroFrame.Dispose();
+                // gyroFrame.Dispose();
             }
         }
         frame.Dispose();
