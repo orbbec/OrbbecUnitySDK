@@ -32,4 +32,7 @@ EditorBuildSettings:
   - enabled: 1
     path: Assets/Orbbec/Scenes/IMUReader.unity
     guid: 09171d9225751f54f9fcdb1b233bbebb
+  - enabled: 1
+    path: Assets/Orbbec/Scenes/Pointcloud.unity
+    guid: 1fecebac3c61fcf429dcdea22420a84a
   m_configObjects: {}
