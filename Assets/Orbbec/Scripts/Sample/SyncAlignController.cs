@@ -54,30 +54,44 @@ public class SyncAlignController : MonoBehaviour
 		
 		hardAlignToggle.onValueChanged.AddListener((value) =>
 		{
-			Config config = pipeline.Pipeline.GetConfig();
-			if (value)
+			try
 			{
-				config.SetAlignMode(AlignMode.ALIGN_D2C_HW_MODE);
+				Config config = pipeline.Pipeline.GetConfig();
+				if (value)
+				{
+					config.SetAlignMode(AlignMode.ALIGN_D2C_HW_MODE);
+				}
+				else
+				{
+					config.SetAlignMode(AlignMode.ALIGN_DISABLE);
+				}
+				pipeline.Pipeline.SwitchConfig(config);
 			}
-			else
+			catch (System.Exception)
 			{
-				config.SetAlignMode(AlignMode.ALIGN_DISABLE);
+				Debug.LogWarning("Device not support hardware d2c");
 			}
-			pipeline.Pipeline.SwitchConfig(config);
 		});
 
 		softAlignToggle.onValueChanged.AddListener((value) =>
 		{
+			try
+			{
 			Config config = pipeline.Pipeline.GetConfig();
-			if (value)
-			{
-				config.SetAlignMode(AlignMode.ALIGN_D2C_SW_MODE);
+				if (value)
+				{
+					config.SetAlignMode(AlignMode.ALIGN_D2C_SW_MODE);
+				}
+				else
+				{
+					config.SetAlignMode(AlignMode.ALIGN_DISABLE);
+				}
+				pipeline.Pipeline.SwitchConfig(config);
 			}
-			else
+			catch (System.Exception)
 			{
-				config.SetAlignMode(AlignMode.ALIGN_DISABLE);
+				Debug.LogWarning("Device not support software d2c");
 			}
-			pipeline.Pipeline.SwitchConfig(config);
 		});
     }
 }
