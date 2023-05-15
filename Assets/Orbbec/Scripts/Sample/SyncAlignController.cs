@@ -56,16 +56,16 @@ public class SyncAlignController : MonoBehaviour
 		{
 			try
 			{
-				Config config = pipeline.Pipeline.GetConfig();
+				pipeline.StopPipeline();
 				if (value)
 				{
-					config.SetAlignMode(AlignMode.ALIGN_D2C_HW_MODE);
+					pipeline.Config.SetAlignMode(AlignMode.ALIGN_D2C_HW_MODE);
 				}
 				else
 				{
-					config.SetAlignMode(AlignMode.ALIGN_DISABLE);
+					pipeline.Config.SetAlignMode(AlignMode.ALIGN_DISABLE);
 				}
-				pipeline.Pipeline.SwitchConfig(config);
+				pipeline.StartPipeline();
 			}
 			catch (System.Exception)
 			{
@@ -77,16 +77,16 @@ public class SyncAlignController : MonoBehaviour
 		{
 			try
 			{
-			Config config = pipeline.Pipeline.GetConfig();
+				pipeline.StopPipeline();
 				if (value)
 				{
-					config.SetAlignMode(AlignMode.ALIGN_D2C_SW_MODE);
+					pipeline.Config.SetAlignMode(AlignMode.ALIGN_D2C_SW_MODE);
 				}
 				else
 				{
-					config.SetAlignMode(AlignMode.ALIGN_DISABLE);
+					pipeline.Config.SetAlignMode(AlignMode.ALIGN_DISABLE);
 				}
-				pipeline.Pipeline.SwitchConfig(config);
+				pipeline.StartPipeline();
 			}
 			catch (System.Exception)
 			{
