@@ -14,6 +14,7 @@ public class Pointcloud : MonoBehaviour
     public OrbbecPipeline pipeline;
     public Button pointcloudButton;
     public Button colorPointcloudButton;
+    public Text tipsText;
 
     private PointCloudFilter filter;
     private Format format;
@@ -22,6 +23,7 @@ public class Pointcloud : MonoBehaviour
 
     private string pointcloudPath;
     private string colorPointcloudPath;
+    private bool pointCloudSaved;
 
     void Start()
     {
@@ -38,6 +40,25 @@ public class Pointcloud : MonoBehaviour
             filter = new PointCloudFilter();
             filter.SetCameraParam(pipeline.Pipeline.GetCameraParam());
         });
+    }
+
+    void Update()
+    {
+        if(pointCloudSaved)
+        {
+            if(format == Format.OB_FORMAT_POINT)
+            {
+                tipsText.text = "Point cloud saved to: " + pointcloudPath;
+            }
+            else if(format == Format.OB_FORMAT_RGB_POINT)
+            {
+                tipsText.text = "Point cloud saved to: " + colorPointcloudPath;
+            }
+        }
+        else
+        {
+            tipsText.text = "";
+        }
     }
 
     private void OnFrameset(Frameset frameset)
@@ -62,6 +83,7 @@ public class Pointcloud : MonoBehaviour
 
         if(save)
         {
+            pointCloudSaved = false;
             if(format == Format.OB_FORMAT_POINT)
             {
                 WritePointPly();
@@ -70,6 +92,8 @@ public class Pointcloud : MonoBehaviour
             {
                 WriteColorPointPly();
             }
+            pointCloudSaved = true;
+            save = false;
         }
     }
 
@@ -123,8 +147,6 @@ public class Pointcloud : MonoBehaviour
         
         writer.Close();
         fs.Close();
-
-        save = false;
     }
 
     private void WriteColorPointPly()
@@ -174,7 +196,5 @@ public class Pointcloud : MonoBehaviour
         
         writer.Close();
         fs.Close();
-
-        save = false;
     }
 }
