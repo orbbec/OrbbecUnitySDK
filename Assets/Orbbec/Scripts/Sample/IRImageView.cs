@@ -26,7 +26,14 @@ public class IRImageView : MonoBehaviour
         }
         if(irTexture == null)
         {
-            irTexture = new Texture2D(obIrFrame.width, obIrFrame.height, TextureFormat.RG16, false);
+            if(obIrFrame.format == Format.OB_FORMAT_Y8)
+            {
+                irTexture = new Texture2D(obIrFrame.width, obIrFrame.height, TextureFormat.R8, false);
+            }
+            else
+            {
+                irTexture = new Texture2D(obIrFrame.width, obIrFrame.height, TextureFormat.RG16, false);
+            }
             GetComponent<Renderer>().material.mainTexture = irTexture;
         }
         if(irTexture.width != obIrFrame.width || irTexture.height != obIrFrame.height)

@@ -13,7 +13,7 @@ MonoBehaviour:
   m_Name: DepthProfileSample
   m_EditorClassIdentifier: 
   sensorType: 3
-  width: 640
+  width: 800
   height: 0
   fps: 30
   format: 255
