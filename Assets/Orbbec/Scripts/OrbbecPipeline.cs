@@ -68,9 +68,9 @@ namespace OrbbecUnity
         private void InitConfig()
         {
             config = new Config();
-            foreach (var orbbecProfile in orbbecProfiles)
+            for (int i = orbbecProfiles.Length - 1; i >= 0; i--)
             {
-                var streamProfile = FindProfile(orbbecProfile);
+                var streamProfile = FindProfile(orbbecProfiles[i]);
                 if(streamProfile != null)
                 {
                     config.EnableStream(streamProfile);
@@ -81,19 +81,28 @@ namespace OrbbecUnity
         private StreamProfile FindProfile(OrbbecProfile obProfile)
         {
             var profileList = pipeline.GetStreamProfileList(obProfile.sensorType);
-            var streamProfile = profileList.GetVideoStreamProfile(obProfile.width, obProfile.height, obProfile.format, obProfile.fps);
-            if(streamProfile != null)
+            VideoStreamProfile streamProfile = null;
+            try
             {
-                Debug.LogFormat("Profile found: {0}x{1}@{2} {3}", 
-                        streamProfile.GetWidth(), 
-                        streamProfile.GetHeight(), 
-                        streamProfile.GetFPS(), 
-                        streamProfile.GetFormat());
+                streamProfile = profileList.GetVideoStreamProfile(obProfile.width, obProfile.height, obProfile.format, obProfile.fps);
+                if(streamProfile != null)
+                {
+                    Debug.LogFormat("Profile found: {0}x{1}@{2} {3}", 
+                            streamProfile.GetWidth(), 
+                            streamProfile.GetHeight(), 
+                            streamProfile.GetFPS(), 
+                            streamProfile.GetFormat());
+                }
+                else
+                {
+                    Debug.LogWarning("Profile not found");
+                }
             }
-            else
+            catch (NativeException e)
             {
-                Debug.LogWarning("Profile not found");
+                Debug.Log(e.Message);
             }
+            
             return streamProfile;
         }
 

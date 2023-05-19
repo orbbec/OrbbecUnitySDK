@@ -152,6 +152,8 @@ MonoBehaviour:
   orbbecDevice: {fileID: 666562852}
   orbbecProfiles:
   - {fileID: 11400000, guid: 137086b49c27b55478e86b86ad009d97, type: 2}
+  - {fileID: 11400000, guid: 32ae73c98cd405a41a3ffaf1457fd618, type: 2}
+  - {fileID: 11400000, guid: fc80d20eee56a234d84f8bef77eda731, type: 2}
   onPipelineInit:
     m_PersistentCalls:
       m_Calls: []
