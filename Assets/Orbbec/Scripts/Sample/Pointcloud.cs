@@ -63,26 +63,42 @@ public class Pointcloud : MonoBehaviour
 
     private void OnFrameset(Frameset frameset)
     {
-        filter.SetPointFormat(format);
-
-        var frame = filter.Process(frameset);
-        if(frame != null)
+        if(frameset == null)
         {
-            var pointFrame = frame.As<PointsFrame>();
-            var dataSize = pointFrame.GetDataSize();
-            if(data == null || data.Length != dataSize)
-            {
-                data = new byte[dataSize];
-            }
-            pointFrame.CopyData(ref data);
-            pointFrame.Dispose();
-            frame.Dispose();
+            return;
         }
-
-        frameset.Dispose();
-
         if(save)
         {
+            if(format == Format.OB_FORMAT_POINT)
+            {
+                if(frameset.GetDepthFrame() == null)
+                {
+                    Debug.LogWarning("Depth frame empty");
+                    return;
+                }
+            }
+            if(format == Format.OB_FORMAT_RGB_POINT)
+            {
+                if(frameset.GetDepthFrame() == null || frameset.GetColorFrame() == null)
+                {
+                    Debug.LogWarning("Depth or color frame empty");
+                    return;
+                }
+            }
+            var frame = filter.Process(frameset);
+            if(frame != null)
+            {
+                var pointFrame = frame.As<PointsFrame>();
+                var dataSize = pointFrame.GetDataSize();
+                if(data == null || data.Length != dataSize)
+                {
+                    data = new byte[dataSize];
+                }
+                pointFrame.CopyData(ref data);
+                pointFrame.Dispose();
+                frame.Dispose();
+            }
+
             pointCloudSaved = false;
             if(format == Format.OB_FORMAT_POINT)
             {
@@ -95,17 +111,20 @@ public class Pointcloud : MonoBehaviour
             pointCloudSaved = true;
             save = false;
         }
+        frameset.Dispose();
     }
 
     private void SavePointcloud()
     {
         format = Format.OB_FORMAT_POINT;
+        filter.SetPointFormat(format);
         save = true;
     }
 
     private void SaveColorPointcloud()
     {
         format = Format.OB_FORMAT_RGB_POINT;
+        filter.SetPointFormat(format);
         save = true;
     }
 
