@@ -127,6 +127,7 @@ public class BuildTools
         {
             Directory.Delete(outputPath, true);
         }
+        Directory.CreateDirectory(outputPath);
 
         AssetDatabase.ExportPackage("Assets/Orbbec", Path.Combine(outputPath, unitypackageName),
             ExportPackageOptions.Recurse | ExportPackageOptions.IncludeDependencies);
