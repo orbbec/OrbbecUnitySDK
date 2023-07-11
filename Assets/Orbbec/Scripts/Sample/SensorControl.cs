@@ -1,4 +1,5 @@
-﻿using System.Collections;
+﻿using System;
+using System.Collections;
 using System.Collections.Generic;
 using System.Text;
 using Orbbec;
@@ -87,28 +88,15 @@ public class SensorControl : MonoBehaviour {
 	{
 		propertyIds.Clear();
 
-		for(int id = 0; id <= 138; id++)
+		for(int id = 0; id <= 5000; id++)
 		{
-			PropertyId propertyId = (PropertyId)id;
-			if(curDevice.IsPropertySupported(propertyId, PermissionType.OB_PERMISSION_READ_WRITE))
+			if (Enum.IsDefined(typeof(PropertyId), id))
 			{
-				propertyIds.Add(propertyId);
-			}
-		}
-		for(int id = 2000; id <= 2031; id++)
-		{
-			PropertyId propertyId = (PropertyId)id;
-			if(curDevice.IsPropertySupported(propertyId, PermissionType.OB_PERMISSION_READ_WRITE))
-			{
-				propertyIds.Add(propertyId);
-			}
-		}
-		for(int id = 3000; id <= 3012; id++)
-		{
-			PropertyId propertyId = (PropertyId)id;
-			if(curDevice.IsPropertySupported(propertyId, PermissionType.OB_PERMISSION_READ_WRITE))
-			{
-				propertyIds.Add(propertyId);
+				PropertyId propertyId = (PropertyId)id;
+				if(curDevice.IsPropertySupported(propertyId, PermissionType.OB_PERMISSION_READ_WRITE))
+				{
+					propertyIds.Add(propertyId);
+				}
 			}
 		}
 		
