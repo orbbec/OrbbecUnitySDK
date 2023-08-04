@@ -69,9 +69,11 @@ public class Pointcloud : MonoBehaviour
         }
         if(save)
         {
+            DepthFrame depthFrame = frameset.GetDepthFrame();
+            ColorFrame colorFrame = frameset.GetColorFrame();
             if(format == Format.OB_FORMAT_POINT)
             {
-                if(frameset.GetDepthFrame() == null)
+                if(depthFrame == null)
                 {
                     Debug.LogWarning("Depth frame empty");
                     return;
@@ -79,12 +81,13 @@ public class Pointcloud : MonoBehaviour
             }
             if(format == Format.OB_FORMAT_RGB_POINT)
             {
-                if(frameset.GetDepthFrame() == null || frameset.GetColorFrame() == null)
+                if(depthFrame == null || colorFrame == null)
                 {
                     Debug.LogWarning("Depth or color frame empty");
                     return;
                 }
             }
+            filter.SetPositionDataScaled(depthFrame.GetValueScale());
             var frame = filter.Process(frameset);
             if(frame != null)
             {
