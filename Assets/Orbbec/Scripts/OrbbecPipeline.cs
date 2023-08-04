@@ -68,30 +68,49 @@ namespace OrbbecUnity
         private void InitConfig()
         {
             config = new Config();
-            for (int i = orbbecProfiles.Length - 1; i >= 0; i--)
+            for (int i = 0; i < orbbecProfiles.Length - 1; i++)
             {
-                var streamProfile = FindProfile(orbbecProfiles[i]);
+                var streamProfile = FindProfile(orbbecProfiles[i], StreamType.OB_STREAM_COLOR);
                 if(streamProfile != null)
                 {
                     config.EnableStream(streamProfile);
+                    break;
+                }
+            }
+            for (int i = 0; i < orbbecProfiles.Length - 1; i++)
+            {
+                var streamProfile = FindProfile(orbbecProfiles[i], StreamType.OB_STREAM_DEPTH);
+                if(streamProfile != null)
+                {
+                    config.EnableStream(streamProfile);
+                    break;
+                }
+            }
+            for (int i = 0; i < orbbecProfiles.Length - 1; i++)
+            {
+                var streamProfile = FindProfile(orbbecProfiles[i], StreamType.OB_STREAM_IR);
+                if(streamProfile != null)
+                {
+                    config.EnableStream(streamProfile);
+                    break;
                 }
             }
         }
 
-        private StreamProfile FindProfile(OrbbecProfile obProfile)
+        private VideoStreamProfile FindProfile(OrbbecProfile obProfile, StreamType streamType)
         {
             var profileList = pipeline.GetStreamProfileList(obProfile.sensorType);
-            VideoStreamProfile streamProfile = null;
             try
             {
-                streamProfile = profileList.GetVideoStreamProfile(obProfile.width, obProfile.height, obProfile.format, obProfile.fps);
-                if(streamProfile != null)
+                VideoStreamProfile streamProfile = profileList.GetVideoStreamProfile(obProfile.width, obProfile.height, obProfile.format, obProfile.fps);
+                if(streamProfile != null && streamProfile.GetStreamType() == streamType)
                 {
                     Debug.LogFormat("Profile found: {0}x{1}@{2} {3}", 
                             streamProfile.GetWidth(), 
                             streamProfile.GetHeight(), 
                             streamProfile.GetFPS(), 
                             streamProfile.GetFormat());
+                    return streamProfile;
                 }
                 else
                 {
@@ -103,7 +122,7 @@ namespace OrbbecUnity
                 Debug.Log(e.Message);
             }
             
-            return streamProfile;
+            return null;
         }
 
         public void SetFramesetCallback(FramesetCallback callback)
