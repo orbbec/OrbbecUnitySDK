@@ -10,10 +10,10 @@ MonoBehaviour:
   m_Enabled: 1
   m_EditorHideFlags: 0
   m_Script: {fileID: 11500000, guid: 2114d9585dd431745b4f7485b1b6c2ce, type: 3}
-  m_Name: IRProfile_640_0_30
+  m_Name: ColorProfile_1920
   m_EditorClassIdentifier: 
-  sensorType: 1
-  width: 640
+  sensorType: 2
+  width: 1920
   height: 0
-  fps: 30
-  format: 255
+  fps: 0
+  format: 22
