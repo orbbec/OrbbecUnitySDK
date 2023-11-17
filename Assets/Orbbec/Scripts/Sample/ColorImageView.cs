@@ -20,7 +20,7 @@ public class ColorImageView : MonoBehaviour
         {
             return;
         }
-        if(obColorFrame.frameType != FrameType.OB_FRAME_COLOR || obColorFrame.format != Format.OB_FORMAT_RGB888)
+        if(obColorFrame.frameType != FrameType.OB_FRAME_COLOR || obColorFrame.format != Format.OB_FORMAT_RGB)
         {
             return;
         }
