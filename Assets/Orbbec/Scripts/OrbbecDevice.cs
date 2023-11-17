@@ -58,7 +58,7 @@ namespace OrbbecUnity
                         deviceInfo.Vid(),
                         deviceInfo.Pid());
                     deviceList.Dispose();
-                    onDeviceFound.Invoke(device);
+                    onDeviceFound?.Invoke(device);
                     break;
                 }
                 else

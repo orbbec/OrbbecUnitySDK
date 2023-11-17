@@ -11,6 +11,8 @@ namespace OrbbecUnity
         protected OrbbecVideoFrame obColorFrame = new OrbbecVideoFrame();
         protected OrbbecVideoFrame obDepthFrame = new OrbbecVideoFrame();
         protected OrbbecVideoFrame obIrFrame = new OrbbecVideoFrame();
+        protected OrbbecVideoFrame obIrLeftFrame = new OrbbecVideoFrame();
+        protected OrbbecVideoFrame obIrRightFrame = new OrbbecVideoFrame();
 
         protected void FrameToOrbbecFrame(VideoFrame frame, ref OrbbecVideoFrame orbbecFrame)
         {
@@ -43,6 +45,16 @@ namespace OrbbecUnity
         public OrbbecVideoFrame GetIrFrame()
         {
             return obIrFrame;
+        }
+
+        public OrbbecVideoFrame GetIrLeftFrame()
+        {
+            return obIrLeftFrame;
+        }
+
+        public OrbbecVideoFrame GetIrRightFrame()
+        {
+            return obIrRightFrame;
         }
     }
 }

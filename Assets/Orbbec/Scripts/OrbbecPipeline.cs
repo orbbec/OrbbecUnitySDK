@@ -6,7 +6,7 @@ using UnityEngine.Events;
 namespace OrbbecUnity
 {
     [System.Serializable]
-    public class PipelineInitEvent : UnityEvent {}
+    public class PipelineInitEvent : UnityEvent { }
 
     public class OrbbecPipeline : MonoBehaviour
     {
@@ -50,7 +50,7 @@ namespace OrbbecUnity
 
         void OnDestroy()
         {
-            if(hasInit)
+            if (hasInit)
             {
                 config.Dispose();
                 pipeline.Dispose();
@@ -62,7 +62,7 @@ namespace OrbbecUnity
             pipeline = new Pipeline(device);
             InitConfig();
             hasInit = true;
-            onPipelineInit.Invoke();
+            onPipelineInit?.Invoke();
         }
 
         private void InitConfig()
@@ -71,7 +71,7 @@ namespace OrbbecUnity
             for (int i = 0; i < orbbecProfiles.Length - 1; i++)
             {
                 var streamProfile = FindProfile(orbbecProfiles[i], StreamType.OB_STREAM_COLOR);
-                if(streamProfile != null)
+                if (streamProfile != null)
                 {
                     config.EnableStream(streamProfile);
                     break;
@@ -80,7 +80,7 @@ namespace OrbbecUnity
             for (int i = 0; i < orbbecProfiles.Length - 1; i++)
             {
                 var streamProfile = FindProfile(orbbecProfiles[i], StreamType.OB_STREAM_DEPTH);
-                if(streamProfile != null)
+                if (streamProfile != null)
                 {
                     config.EnableStream(streamProfile);
                     break;
@@ -89,7 +89,25 @@ namespace OrbbecUnity
             for (int i = 0; i < orbbecProfiles.Length - 1; i++)
             {
                 var streamProfile = FindProfile(orbbecProfiles[i], StreamType.OB_STREAM_IR);
-                if(streamProfile != null)
+                if (streamProfile != null)
+                {
+                    config.EnableStream(streamProfile);
+                    break;
+                }
+            }
+            for (int i = 0; i < orbbecProfiles.Length - 1; i++)
+            {
+                var streamProfile = FindProfile(orbbecProfiles[i], StreamType.OB_STREAM_IR_LEFT);
+                if (streamProfile != null)
+                {
+                    config.EnableStream(streamProfile);
+                    break;
+                }
+            }
+            for (int i = 0; i < orbbecProfiles.Length - 1; i++)
+            {
+                var streamProfile = FindProfile(orbbecProfiles[i], StreamType.OB_STREAM_IR_RIGHT);
+                if (streamProfile != null)
                 {
                     config.EnableStream(streamProfile);
                     break;
@@ -99,16 +117,16 @@ namespace OrbbecUnity
 
         private VideoStreamProfile FindProfile(OrbbecProfile obProfile, StreamType streamType)
         {
-            var profileList = pipeline.GetStreamProfileList(obProfile.sensorType);
             try
             {
+                var profileList = pipeline.GetStreamProfileList(obProfile.sensorType);
                 VideoStreamProfile streamProfile = profileList.GetVideoStreamProfile(obProfile.width, obProfile.height, obProfile.format, obProfile.fps);
-                if(streamProfile != null && streamProfile.GetStreamType() == streamType)
+                if (streamProfile != null && streamProfile.GetStreamType() == streamType)
                 {
-                    Debug.LogFormat("Profile found: {0}x{1}@{2} {3}", 
-                            streamProfile.GetWidth(), 
-                            streamProfile.GetHeight(), 
-                            streamProfile.GetFPS(), 
+                    Debug.LogFormat("Profile found: {0}x{1}@{2} {3}",
+                            streamProfile.GetWidth(),
+                            streamProfile.GetHeight(),
+                            streamProfile.GetFPS(),
                             streamProfile.GetFormat());
                     return streamProfile;
                 }
@@ -121,7 +139,7 @@ namespace OrbbecUnity
             {
                 Debug.Log(e.Message);
             }
-            
+
             return null;
         }
 

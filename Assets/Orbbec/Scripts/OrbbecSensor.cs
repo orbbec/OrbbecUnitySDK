@@ -1,13 +1,19 @@
 using System.Collections;
 using Orbbec;
 using UnityEngine;
+using UnityEngine.Events;
 
 namespace OrbbecUnity
 {
+    [System.Serializable]
+    public class SensorInitEvent : UnityEvent { }
+
     public class OrbbecSensor : MonoBehaviour
     {
         public OrbbecDevice orbbecDevice;
-        public OrbbecProfile orbbecProfile;
+        public SensorType sensorType;
+        public OrbbecProfile[] orbbecProfiles;
+        public SensorInitEvent onSensorInit;
 
         private Sensor sensor;
         private VideoStreamProfile streamProfile;
@@ -34,19 +40,32 @@ namespace OrbbecUnity
             }
         }
 
-        private void ConfigProfile()
+        private VideoStreamProfile FindProfile(OrbbecProfile obProfile)
         {
-            var profileList = sensor.GetStreamProfileList();
-            streamProfile = profileList.GetVideoStreamProfile(orbbecProfile.width, orbbecProfile.height, orbbecProfile.format, orbbecProfile.fps);
-            if(streamProfile != null)
+            try
             {
-                Debug.Log(string.Format("Profile found: {0}x{1}@{2} {3}", 
-                        streamProfile.GetWidth(), streamProfile.GetHeight(), streamProfile.GetFPS(), streamProfile.GetFormat()));
+                var profileList = sensor.GetStreamProfileList();
+                VideoStreamProfile streamProfile = profileList.GetVideoStreamProfile(obProfile.width, obProfile.height, obProfile.format, obProfile.fps);
+                if (streamProfile != null && obProfile.sensorType == sensor.GetSensorType())
+                {
+                    Debug.LogFormat("Profile found: {0}x{1}@{2} {3}",
+                            streamProfile.GetWidth(),
+                            streamProfile.GetHeight(),
+                            streamProfile.GetFPS(),
+                            streamProfile.GetFormat());
+                    return streamProfile;
+                }
+                else
+                {
+                    Debug.LogWarning("Profile not found");
+                }
             }
-            else
+            catch (NativeException e)
             {
-                Debug.LogWarning("Profile not found");
+                Debug.Log(e.Message);
             }
+
+            return null;
         }
 
         public void SetFrameCallback(FrameCallback callback)
@@ -66,9 +85,22 @@ namespace OrbbecUnity
 
         private void InitSensor(Device device)
         {
-            sensor = device.GetSensor(orbbecProfile.sensorType);
-            Debug.Log("Sensor found: " + orbbecProfile.sensorType);
-            ConfigProfile();     
+            sensor = device.GetSensor(sensorType);
+            if(sensor == null)
+            {
+                Debug.LogError("Sensor not found: " + sensorType);
+                return;
+            }
+
+            for (int i = 0; i < orbbecProfiles.Length - 1; i++)
+            {
+                streamProfile = FindProfile(orbbecProfiles[i]);
+                if (streamProfile != null)
+                {
+                    break;
+                }
+            }
+            onSensorInit?.Invoke();
         }
     }
 }

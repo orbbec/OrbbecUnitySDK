@@ -5,22 +5,22 @@ using OrbbecUnity;
 using UnityEngine;
 using UnityEngine.UI;
 
-public class IRImageView : MonoBehaviour
+public class IRLeftImageView : MonoBehaviour
 {
     public OrbbecFrameSource frameSource;
-
+    
     private Texture2D irTexture;
     
 
     void Update()
     {
-        var obIrFrame = frameSource.GetIrFrame();
+        var obIrFrame = frameSource.GetIrLeftFrame();
 
         if(obIrFrame == null || obIrFrame.width == 0 || obIrFrame.height == 0 || obIrFrame.data == null || obIrFrame.data.Length == 0)
         {
             return;
         }
-        if(obIrFrame.frameType != FrameType.OB_FRAME_IR)
+        if(obIrFrame.frameType != FrameType.OB_FRAME_IR_LEFT)
         {
             return;
         }

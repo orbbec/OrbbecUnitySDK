@@ -21,6 +21,9 @@ EditorBuildSettings:
     path: Assets/Orbbec/Scenes/IRViewer.unity
     guid: 238bc141c709d4449b08b4fa8c4bc7cc
   - enabled: 1
+    path: Assets/Orbbec/Scenes/DoubleIRViewer.unity
+    guid: d4549834fe3f174448520211c00bcad8
+  - enabled: 1
     path: Assets/Orbbec/Scenes/SensorControl.unity
     guid: c6bfef01b31fe81449043956dd165481
   - enabled: 1

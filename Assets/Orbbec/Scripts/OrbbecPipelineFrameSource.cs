@@ -17,14 +17,35 @@ namespace OrbbecUnity
 
         private void OnFrameset(Frameset frameset)
         {
-            var colorFrame = frameset.GetColorFrame();
-            FrameToOrbbecFrame(colorFrame, ref obColorFrame);
+            var colorFrame = frameset.GetFrame(FrameType.OB_FRAME_COLOR);
+            if(colorFrame != null)
+            {
+                FrameToOrbbecFrame(colorFrame.As<VideoFrame>(), ref obColorFrame);
+            }
 
-            var depthFrame = frameset.GetDepthFrame();
-            FrameToOrbbecFrame(depthFrame, ref obDepthFrame);
+            var depthFrame = frameset.GetFrame(FrameType.OB_FRAME_DEPTH);
+            if(depthFrame != null)
+            {
+                FrameToOrbbecFrame(depthFrame.As<VideoFrame>(), ref obDepthFrame);
+            }
 
-            var irFrame = frameset.GetIRFrame();
-            FrameToOrbbecFrame(irFrame, ref obIrFrame);
+            var irFrame = frameset.GetFrame(FrameType.OB_FRAME_IR);
+            if(irFrame != null)
+            {
+                FrameToOrbbecFrame(irFrame.As<VideoFrame>(), ref obIrFrame);
+            }
+
+            var irLeftFrame = frameset.GetFrame(FrameType.OB_FRAME_IR_LEFT);
+            if(irLeftFrame != null)
+            {
+                FrameToOrbbecFrame(irLeftFrame.As<VideoFrame>(), ref obIrLeftFrame);
+            }
+
+            var irRightFrame = frameset.GetFrame(FrameType.OB_FRAME_IR_RIGHT);
+            if(irRightFrame != null)
+            {
+                FrameToOrbbecFrame(irRightFrame.As<VideoFrame>(), ref obIrRightFrame);
+            }
 
             frameset.Dispose();
         }
