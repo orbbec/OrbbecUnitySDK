@@ -46,6 +46,7 @@ namespace OrbbecUnity
             while (true)
             {
                 yield return new WaitForEndOfFrame();
+                context.EnableNetDeviceEnumeration(true);
                 DeviceList deviceList = context.QueryDeviceList();
                 if (deviceList.DeviceCount() > deviceIndex)
                 {

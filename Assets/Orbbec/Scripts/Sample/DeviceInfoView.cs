@@ -34,7 +34,6 @@ public class DeviceInfoView : MonoBehaviour
         sb.AppendLine(string.Format("Device sn: {0}", devInfo.SerialNumber()));
         sb.AppendLine(string.Format("Device firmware: {0}", devInfo.FirmwareVersion()));
         sb.AppendLine(string.Format("Device connection type: {0}", devInfo.ConnectionType()));
-        sb.AppendLine(string.Format("Device ip: {0}", devInfo.IPAddress()));
 
         SensorList sensorList = device.GetSensorList();
         for (uint i = 0; i < sensorList.SensorCount(); i++)

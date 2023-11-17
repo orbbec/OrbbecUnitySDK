@@ -58,6 +58,7 @@ public class SensorControl : MonoBehaviour {
 		while (true)
 		{
 			yield return new WaitForEndOfFrame();
+			context.EnableNetDeviceEnumeration(true);
 			DeviceList deviceList = context.QueryDeviceList();
 			if (deviceList.DeviceCount() > 0)
 			{
