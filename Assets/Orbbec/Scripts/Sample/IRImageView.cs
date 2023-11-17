@@ -1,4 +1,9 @@
-﻿using System.Collections;
+﻿/**
+ * IR流示例
+ * 注：Gemini 2 XL IR分为左IR和右IR，该示例暂不支持
+ */
+
+using System.Collections;
 using System.Collections.Generic;
 using Orbbec;
 using OrbbecUnity;
