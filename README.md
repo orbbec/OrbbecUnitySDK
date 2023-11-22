@@ -44,7 +44,7 @@ If you want to implement more complex or flexible functionalities, you can direc
 | **products list** | **firmware version** |
 | --- | --- |
 | Femto Bolt       | 1.0.6  (windows 10 unsupported android) |
-| Femto Mega       | 1.1.7  (window10,unsupported android)  |
+| Femto Mega       | 1.1.7  (windows 10,unsupported android)  |
 | Gemini 2 XL      | Obox: V1.2.5  VL:1.4.54    |
 | Astra 2          | 2.8.20                     |
 | Gemini 2 L       | 1.4.32                     |
