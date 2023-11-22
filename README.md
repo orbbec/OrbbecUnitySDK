@@ -34,6 +34,7 @@ After importing the unitypackage, you can see several sample scenes in the Orbbe
 - RecordPlayback demonstrates how to record and playback depth and color streams.
 - IMUReader demonstrates how to obtain gyroscope and accelerometer data.
 - Pointcloud demonstrates how to save depth point clouds and colored point clouds.
+- DoubleIRViewer demonstrates how to output and render left IR and right IR, Gemini 2 XL support simultaneous output of left IR and right IR.
 
 # 4. API Interface Introduction
 
