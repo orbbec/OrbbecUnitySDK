@@ -28,7 +28,7 @@ public class RecordPlayback : MonoBehaviour
     private void OnSDKInit()
     {
         Config config = pipeline.Config;
-		config.SetAlignMode(AlignMode.ALIGN_D2C_HW_MODE);
+		config.SetAlignMode(AlignMode.ALIGN_D2C_SW_MODE);
         try
         {
             pipeline.Pipeline.EnableFrameSync();

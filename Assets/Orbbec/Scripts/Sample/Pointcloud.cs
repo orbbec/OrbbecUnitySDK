@@ -35,7 +35,7 @@ public class Pointcloud : MonoBehaviour
 
         pipeline.SetFramesetCallback(OnFrameset);
         pipeline.onPipelineInit.AddListener(()=>{
-            pipeline.Config.SetAlignMode(AlignMode.ALIGN_D2C_HW_MODE);
+            pipeline.Config.SetAlignMode(AlignMode.ALIGN_D2C_SW_MODE);
             pipeline.StartPipeline();
             filter = new PointCloudFilter();
             filter.SetCameraParam(pipeline.Pipeline.GetCameraParam());
