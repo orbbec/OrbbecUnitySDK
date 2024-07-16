@@ -15,7 +15,9 @@ namespace Orbbec
         private static Dictionary<IntPtr, MediaStateCallback> _mediaStateCallbacks = new Dictionary<IntPtr, MediaStateCallback>();
         private NativeMediaStateCallback _nativeMediaStateCallback;
 
+#if ORBBEC_UNITY
         [AOT.MonoPInvokeCallback (typeof(PlaybackCallback))]
+#endif
         private static void OnPlayback(IntPtr framePtr, IntPtr userData)
         {
             Frame frame = new Frame(framePtr);
@@ -30,7 +32,9 @@ namespace Orbbec
             }
         }
 
+#if ORBBEC_UNITY
         [AOT.MonoPInvokeCallback (typeof(MediaStateCallback))]
+#endif
         private static void OnMediaState(MediaState state, IntPtr userData)
         {
             _mediaStateCallbacks.TryGetValue(userData, out MediaStateCallback callback);

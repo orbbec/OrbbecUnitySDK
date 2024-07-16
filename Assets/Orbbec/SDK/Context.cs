@@ -14,8 +14,10 @@ namespace Orbbec
         public static Dictionary<IntPtr, DeviceChangedCallback> _deviceChangedCallbacks = new Dictionary<IntPtr, DeviceChangedCallback>();
         private static LogCallback _logCallback;
         private static NativeLogCallback _nativeLogCallback;
-
+        
+#if ORBBEC_UNITY
         [AOT.MonoPInvokeCallback(typeof(NativeDeviceChangedCallback))]
+#endif
         private static void OnDeviceChanged(IntPtr removedPtr, IntPtr addedPtr, IntPtr userData)
         {
             DeviceList removed = new DeviceList(removedPtr);
@@ -31,8 +33,10 @@ namespace Orbbec
                 added.Dispose();
             }
         }
-
+        
+#if ORBBEC_UNITY
         [AOT.MonoPInvokeCallback(typeof(NativeLogCallback))]
+#endif        
         private static void OnLogCallback(LogSeverity logSeverity, String message, IntPtr userData)
         {
             if(_logCallback != null)

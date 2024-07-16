@@ -12,7 +12,9 @@ namespace Orbbec
         private static Dictionary<IntPtr, FrameCallback> _frameCallbacks = new Dictionary<IntPtr, FrameCallback>();
         private NativeFrameCallback _nativeCallback;
 
+#if ORBBEC_UNITY
         [AOT.MonoPInvokeCallback(typeof(FrameCallback))]
+#endif
         private void OnFrame(IntPtr framePtr, IntPtr userData)
         {
             Frame frame = new Frame(framePtr);

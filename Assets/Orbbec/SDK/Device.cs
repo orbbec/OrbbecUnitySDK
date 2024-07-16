@@ -24,7 +24,9 @@ namespace Orbbec
         private static Dictionary<IntPtr, SendFileCallback> _sendFileCallbacks = new Dictionary<IntPtr, SendFileCallback>();
         private NativeSendFileCallback _nativeSendFileCallback;
 
+#if ORBBEC_UNITY
         [AOT.MonoPInvokeCallback(typeof(DeviceStateCallback))]
+#endif
         private static void OnDeviceState(UInt64 state, String message, IntPtr userData)
         {
             _deviceStateCallbacks.TryGetValue(userData, out DeviceStateCallback callback);
@@ -34,7 +36,9 @@ namespace Orbbec
             }
         }
 
+#if ORBBEC_UNITY
         [AOT.MonoPInvokeCallback(typeof(SetDataCallback))]
+#endif
         private static void OnSetData(DataTranState state, uint percent, IntPtr userData)
         {
             _setDataCallbacks.TryGetValue(userData, out SetDataCallback callback);
@@ -44,7 +48,9 @@ namespace Orbbec
             }
         }
 
+#if ORBBEC_UNITY
         [AOT.MonoPInvokeCallback (typeof(GetDataCallback))]
+#endif
         private static void OnGetData(DataTranState state, DataChunk dataChunk, IntPtr userData)
         {
             _getDataCallbacks.TryGetValue(userData, out GetDataCallback callback);
@@ -54,7 +60,9 @@ namespace Orbbec
             }
         }
 
+#if ORBBEC_UNITY
         [AOT.MonoPInvokeCallback(typeof(DeviceUpgradeCallback))]
+#endif
         private static void OnDeviceUpgrade(UpgradeState state, String message, byte percent, IntPtr userData)
         {
             _deviceUpgradeCallbacks.TryGetValue(userData, out DeviceUpgradeCallback callback);
@@ -64,7 +72,9 @@ namespace Orbbec
             }
         }
 
+#if ORBBEC_UNITY
         [AOT.MonoPInvokeCallback(typeof(SendFileCallback))]
+#endif
         private static void OnSendFile(FileTranState state, String message, byte percent, IntPtr userData)
         {
             _sendFileCallbacks.TryGetValue(userData, out SendFileCallback callback);

@@ -12,8 +12,10 @@ namespace Orbbec
         private Device _device;
         private static Dictionary<IntPtr, FramesetCallback> _framesetCallbacks = new Dictionary<IntPtr, FramesetCallback>();
         private NativeFramesetCallback _nativeCallback;
-
+        
+#if ORBBEC_UNITY
         [AOT.MonoPInvokeCallback(typeof(NativeFramesetCallback))]
+#endif
         private static void OnFrameset(IntPtr framesetPtr, IntPtr userData)
         {
             Frameset frameset = new Frameset(framesetPtr);

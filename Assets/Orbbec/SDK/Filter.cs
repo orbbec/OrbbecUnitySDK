@@ -13,7 +13,9 @@ namespace Orbbec
         private static Dictionary<IntPtr, FilterCallback> _filterCallbacks = new Dictionary<IntPtr, FilterCallback>();
         private NativeFilterCallback _nativeCallback;
 
+#if ORBBEC_UNITY
         [AOT.MonoPInvokeCallback(typeof(FilterCallback))]
+#endif
         private static void OnFilter(IntPtr framePtr, IntPtr userData)
         {
             Frame frame = new Frame(framePtr);
