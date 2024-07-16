@@ -1,4 +1,5 @@
 using System;
+using System.Collections.Generic;
 using System.Runtime.InteropServices;
 
 namespace Orbbec
@@ -9,18 +10,20 @@ namespace Orbbec
     public class Context : IDisposable
     {
         private NativeHandle _handle;
-        private DeviceChangedCallback _deviceChangedCallback;
         private NativeDeviceChangedCallback _nativeDeviceChangedCallback;
+        public static Dictionary<IntPtr, DeviceChangedCallback> _deviceChangedCallbacks = new Dictionary<IntPtr, DeviceChangedCallback>();
         private static LogCallback _logCallback;
         private static NativeLogCallback _nativeLogCallback;
 
-        private void OnDeviceChanged(IntPtr removedPtr, IntPtr addedPtr, IntPtr userData)
+        [AOT.MonoPInvokeCallback(typeof(NativeDeviceChangedCallback))]
+        private static void OnDeviceChanged(IntPtr removedPtr, IntPtr addedPtr, IntPtr userData)
         {
             DeviceList removed = new DeviceList(removedPtr);
             DeviceList added = new DeviceList(addedPtr);
-            if (_deviceChangedCallback != null)
+            _deviceChangedCallbacks.TryGetValue(userData, out DeviceChangedCallback callback);
+            if (callback != null)
             {
-                _deviceChangedCallback(removed, added);
+                callback(removed, added);
             }
             else
             {
@@ -29,7 +32,8 @@ namespace Orbbec
             }
         }
 
-        private void OnLogCallback(LogSeverity logSeverity, String message, IntPtr userData)
+        [AOT.MonoPInvokeCallback(typeof(NativeLogCallback))]
+        private static void OnLogCallback(LogSeverity logSeverity, String message, IntPtr userData)
         {
             if(_logCallback != null)
             {
@@ -145,9 +149,9 @@ namespace Orbbec
         */
         public void SetDeviceChangedCallback(DeviceChangedCallback callback)
         {
-            _deviceChangedCallback = callback;
+            _deviceChangedCallbacks[_handle.Ptr] = callback;
             IntPtr error = IntPtr.Zero;
-            obNative.ob_set_device_changed_callback(_handle.Ptr, _nativeDeviceChangedCallback, IntPtr.Zero, ref error);
+            obNative.ob_set_device_changed_callback(_handle.Ptr, _nativeDeviceChangedCallback, _handle.Ptr, ref error);
             if (error != IntPtr.Zero)
             {
                 throw new NativeException(new Error(error));

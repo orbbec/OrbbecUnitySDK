@@ -9,15 +9,17 @@ namespace Orbbec
     public class Sensor : IDisposable
     {
         private NativeHandle _handle;
-        private FrameCallback _callback;
+        private static Dictionary<IntPtr, FrameCallback> _frameCallbacks = new Dictionary<IntPtr, FrameCallback>();
         private NativeFrameCallback _nativeCallback;
 
+        [AOT.MonoPInvokeCallback(typeof(FrameCallback))]
         private void OnFrame(IntPtr framePtr, IntPtr userData)
         {
             Frame frame = new Frame(framePtr);
-            if(_callback != null)
+            _frameCallbacks.TryGetValue(userData, out FrameCallback callback);
+            if(callback != null)
             {
-                _callback(frame);
+                callback(frame);
             }
             else
             {
@@ -95,9 +97,9 @@ namespace Orbbec
         */
         public void Start(StreamProfile streamProfile, FrameCallback callback)
         {
-            _callback = callback;
+            _frameCallbacks[_handle.Ptr] = callback;
             IntPtr error = IntPtr.Zero;
-            obNative.ob_sensor_start(_handle.Ptr, streamProfile.GetNativeHandle().Ptr, _nativeCallback, IntPtr.Zero, ref error);
+            obNative.ob_sensor_start(_handle.Ptr, streamProfile.GetNativeHandle().Ptr, _nativeCallback, _handle.Ptr, ref error);
             if(error != IntPtr.Zero)
             {
                 throw new NativeException(new Error(error));
